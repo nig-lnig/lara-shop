@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lara-Shop · Présentation en 19 parties</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="presentation.js" defer></script>
+</head>
+<body>
+<div class="viewport">
+<div class="deck" role="region" aria-roledescription="diaporama" aria-label="Présentation Lara-Shop">
+
+<!-- =====================================================================
+     PARTIE 1 · Introduction (≈ 3 min)
+     ===================================================================== -->
+<section class="slide title" data-presenter="1" data-section="Introduction" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">1</span> Ouverture</p>
+    <h1>Lara-Shop</h1>
+    <p>Une boutique en ligne de papeterie et de fournitures de bureau, construite avec Laravel et expliquée en 19 parties.</p>
+    <div class="badge-row">
+        <span class="pill">Laravel 12</span><span class="pill">PHP 8.2</span><span class="pill">SQLite</span><span class="pill">EST Safi · LP-ISIR 2026/2027</span>
+    </div>
+    <img class="hero-img" src="img/hero-lara-shop.svg" alt="Cahier, livres, calculatrice, crayons et plante">
+    <aside class="notes">
+        <p>Bonjour à toutes et à tous. Nous allons vous présenter Lara-Shop, l’application que nous avons construite à partir du sujet PDF du cours.</p>
+        <p>Nous sommes 19 : chacun présente une partie, de la base de données jusqu’à une démonstration complète, puis un quiz final.</p>
+        <p>Raccourcis : flèches pour avancer, N pour les notes, F pour le plein écran.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="1" data-section="Introduction" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">1</span> Le projet</p>
+    <h2>Une vraie boutique, à partir du sujet</h2>
+    <div class="body cols-40">
+        <div>
+            <ul>
+                <li>Le sujet décrit <strong>5 entités</strong> : Client, Commande, Fournisseur, Produit, Ligne Commande.</li>
+                <li>La boutique vend <strong>30 articles</strong> en 4 familles : Papeterie, Bureautique, Fourniture, Librairie.</li>
+                <li>Paiement <strong>à la livraison</strong> ou <strong>à 30 jours</strong>, sans paiement en ligne.</li>
+                <li>Toutes les données de démonstration sont créées par une seule commande : <code>php artisan migrate --seed</code>.</li>
+            </ul>
+        </div>
+        <figure class="shot"><img src="img/desktop-01-catalog.png" alt="Page d’accueil : bandeau d’accueil puis catalogue avec filtres"><figcaption>La page d’accueil <code>/</code> : le bandeau puis le catalogue.</figcaption></figure>
+    </div>
+    <aside class="notes">
+        <p>Le point de départ, c’est le PDF : cinq entités et sept règles de gestion. Nous en avons fait une boutique utilisable.</p>
+        <p>Montrer la capture : l’accueil est directement le catalogue, avec les filtres à gauche.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="1" data-section="Introduction" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">1</span> Les utilisateurs</p>
+    <h2>Qui fait quoi ?</h2>
+    <div class="cards cards-3">
+        <div class="card"><h3>Visiteur</h3><ul><li>Parcourir et filtrer le catalogue</li><li>Voir une fiche produit</li><li>Remplir un panier</li></ul></div>
+        <div class="card accent"><h3>Client</h3><ul><li>Commander (LIV ou T30)</li><li>Suivre, annuler, télécharger ses commandes</li><li>Favoris, profil, « Mes données »</li></ul>
+            <p class="small"><code>client@larashop.test</code></p></div>
+        <div class="card dark"><h3>Administrateur</h3><ul><li>Tableau de bord</li><li>Clients, fournisseurs, produits, stock</li><li>Statuts des commandes, exports</li></ul>
+            <p class="small"><code>admin@larashop.test</code></p></div>
+    </div>
+    <p class="small muted" style="margin-top: 22px">Mot de passe des comptes de démonstration : <code>password</code>. Khadija (Cli-000001) a une remise de 10 %.</p>
+    <aside class="notes">
+        <p>Trois profils : le visiteur, le client et l’administrateur. Les mêmes comptes serviront dans toutes les démonstrations.</p>
+        <p class="handoff">Passage : « Pour comprendre ce que le code doit respecter, je laisse la parole à la partie 2 sur les règles métier. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 2 · Règles métier (≈ 2 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="2" data-section="Règles métier" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">2</span> Règles de gestion</p>
+    <h2>Les 7 règles du sujet, dans le code</h2>
+    <table class="t">
+        <thead><tr><th>Règle du PDF</th><th>Ce qui la garantit</th></tr></thead>
+        <tbody>
+        <tr><td>1–2. Un client passe plusieurs commandes ; une commande a un seul client</td><td>colonne <code>orders.client_id</code> (clé étrangère)</td></tr>
+        <tr><td>3–4. Une commande contient plusieurs produits ; un produit est dans plusieurs commandes</td><td>table <code>order_lines</code></td></tr>
+        <tr><td>5. Le prix unitaire n’est pas négociable</td><td>le prix est toujours relu en base, jamais pris dans le formulaire</td></tr>
+        <tr><td>6–7. Un produit a un seul fournisseur ; un fournisseur fournit plusieurs produits</td><td>colonne <code>products.supplier_id</code></td></tr>
+        </tbody>
+    </table>
+    <aside class="notes">
+        <p>Le PDF donne sept règles. Les règles 1 à 4 et 6 à 7 deviennent des relations entre tables, que la partie 3 détaillera.</p>
+        <p>La règle 5 est intéressante : le prix ne vient jamais du navigateur, le serveur le relit toujours.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="2" data-section="Règles métier" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">2</span> Formats et valeurs</p>
+    <h2>Codes métier et conditions de paiement</h2>
+    <div class="body cols-2">
+        <div class="cards cards-2">
+            <div class="card"><span class="big">Cli-000001</span><p>Client</p></div>
+            <div class="card"><span class="big">Com-000001</span><p>Commande</p></div>
+            <div class="card"><span class="big">Pr-000001</span><p>Produit</p></div>
+            <div class="card"><span class="big">Fr-000001</span><p>Fournisseur</p></div>
+            <div class="card accent" style="grid-column: 1 / -1"><h3>Condition de paiement</h3><p><strong>LIV</strong> à la livraison · <strong>T30</strong> à 30 jours</p></div>
+        </div>
+        <div>
+            <p class="code-file">app/Models/Concerns/HasBusinessCode.php</p>
+            <div class="excerpt" data-file="app/Models/Concerns/HasBusinessCode.php"><pre class="code">$model->{$column} = $model->codePrefix.'-'.str_pad((string) $model->id, 6, '0', STR_PAD_LEFT);
+$model->saveQuietly(); // save without firing events again</pre></div>
+            <ul style="margin-top: 18px">
+                <li class="small">Le code est fabriqué par le serveur à partir de l’<code>id</code>, juste après l’insertion.</li>
+                <li class="small">Type client : PU, PA, LI, AS, DI · remise de 0 à 100 %.</li>
+                <li class="small">Familles : PA, BU, FO, LI.</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Chaque objet a un code lisible, avec un préfixe et six chiffres. Personne ne le tape : le serveur le calcule à partir de l’id.</p>
+        <p>La condition de paiement est séparée du statut de livraison : LIV ou T30.</p>
+        <p class="handoff">Passage : « Ces codes vivent dans des tables : la partie 3 vous montre le schéma de la base. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 3 · Base de données (≈ 2 min 30)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="3" data-section="Base de données" data-time="≈ 2 min 30">
+    <p class="kicker"><span class="num">3</span> Schéma de la base</p>
+    <h2 class="h2-compact">Cinq entités du PDF, deux tables ajoutées</h2>
+    <div class="er er-wide"><!--ER--><svg viewBox="0 0 1090 592" role="img" aria-labelledby="er-wide-title er-wide-desc" xmlns="http://www.w3.org/2000/svg"><title id="er-wide-title">Schéma de la base de données Lara-Shop</title><desc id="er-wide-desc">Sept tables : clients, orders, order_lines, products, suppliers, plus users et favorites. Un client a plusieurs commandes ; une commande a plusieurs lignes ; un produit apparaît dans plusieurs lignes ; un fournisseur fournit plusieurs produits ; un compte utilisateur est lié à au plus un client ; favorites relie les comptes et les produits (plusieurs à plusieurs).</desc><g><rect x="20" y="20" width="240" height="166" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="20" y="20" width="240" height="32" rx="8" fill="#14213d"/><rect x="20" y="44" width="240" height="8" fill="#14213d"/><text x="30" y="41" fill="#fff" font-size="14" font-weight="700">users</text><text x="250" y="41" fill="#c8d1e6" font-size="10.5" text-anchor="end">Compte de connexion</text><text x="30" y="67" font-size="12" fill="#14213d" font-weight="700">id</text><text x="250" y="67" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="30" y="88" font-size="12" fill="#14213d" font-weight="400">name</text><text x="30" y="109" font-size="12" fill="#14213d" font-weight="400">email</text><text x="250" y="109" font-size="10.5" fill="#5e6880" text-anchor="end">unique</text><text x="30" y="130" font-size="12" fill="#14213d" font-weight="400">password</text><text x="250" y="130" font-size="10.5" fill="#5e6880" text-anchor="end">haché</text><text x="30" y="151" font-size="12" fill="#14213d" font-weight="400">role</text><text x="250" y="151" font-size="10.5" fill="#5e6880" text-anchor="end">admin | customer</text><text x="30" y="172" font-size="12" fill="#1f4fd1" font-weight="700">client_id</text><text x="250" y="172" font-size="10.5" fill="#5e6880" text-anchor="end">FK → clients, unique</text></g><g><rect x="290" y="20" width="240" height="229" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="290" y="20" width="240" height="32" rx="8" fill="#14213d"/><rect x="290" y="44" width="240" height="8" fill="#14213d"/><text x="300" y="41" fill="#fff" font-size="14" font-weight="700">clients</text><text x="520" y="41" fill="#c8d1e6" font-size="10.5" text-anchor="end">PDF : Client</text><text x="300" y="67" font-size="12" fill="#14213d" font-weight="700">id</text><text x="520" y="67" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="300" y="88" font-size="12" fill="#14213d" font-weight="400">code</text><text x="520" y="88" font-size="10.5" fill="#5e6880" text-anchor="end">unique · Cli-000001</text><text x="300" y="109" font-size="12" fill="#14213d" font-weight="400">name</text><text x="300" y="130" font-size="12" fill="#14213d" font-weight="400">street</text><text x="300" y="151" font-size="12" fill="#14213d" font-weight="400">postal_code</text><text x="520" y="151" font-size="10.5" fill="#5e6880" text-anchor="end">texte</text><text x="300" y="172" font-size="12" fill="#14213d" font-weight="400">city</text><text x="300" y="193" font-size="12" fill="#14213d" font-weight="400">type</text><text x="520" y="193" font-size="10.5" fill="#5e6880" text-anchor="end">PU|PA|LI|AS|DI</text><text x="300" y="214" font-size="12" fill="#14213d" font-weight="400">special_discount</text><text x="520" y="214" font-size="10.5" fill="#5e6880" text-anchor="end">0 à 100 %</text><text x="300" y="235" font-size="12" fill="#14213d" font-weight="400">archived_at</text><text x="520" y="235" font-size="10.5" fill="#5e6880" text-anchor="end">archivage</text></g><g><rect x="560" y="20" width="240" height="250" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="560" y="20" width="240" height="32" rx="8" fill="#14213d"/><rect x="560" y="44" width="240" height="8" fill="#14213d"/><text x="570" y="41" fill="#fff" font-size="14" font-weight="700">orders</text><text x="790" y="41" fill="#c8d1e6" font-size="10.5" text-anchor="end">PDF : Commande</text><text x="570" y="67" font-size="12" fill="#14213d" font-weight="700">id</text><text x="790" y="67" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="570" y="88" font-size="12" fill="#14213d" font-weight="400">number</text><text x="790" y="88" font-size="10.5" fill="#5e6880" text-anchor="end">unique · Com-000001</text><text x="570" y="109" font-size="12" fill="#14213d" font-weight="400">order_date</text><text x="570" y="130" font-size="12" fill="#14213d" font-weight="400">payment_terms</text><text x="790" y="130" font-size="10.5" fill="#5e6880" text-anchor="end">LIV | T30</text><text x="570" y="151" font-size="12" fill="#1f4fd1" font-weight="700">client_id</text><text x="790" y="151" font-size="10.5" fill="#5e6880" text-anchor="end">FK → clients</text><text x="570" y="172" font-size="12" fill="#14213d" font-weight="400">status</text><text x="790" y="172" font-size="10.5" fill="#5e6880" text-anchor="end">pending … cancelled</text><text x="570" y="193" font-size="12" fill="#14213d" font-weight="400">discount_rate</text><text x="790" y="193" font-size="10.5" fill="#5e6880" text-anchor="end">% figé</text><text x="570" y="214" font-size="12" fill="#14213d" font-weight="400">subtotal · discount_amount · total</text><text x="570" y="235" font-size="12" fill="#14213d" font-weight="400">checkout_token</text><text x="790" y="235" font-size="10.5" fill="#5e6880" text-anchor="end">unique</text><text x="570" y="256" font-size="12" fill="#14213d" font-weight="400">stock_restored_at</text></g><g><rect x="20" y="310" width="240" height="124" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="20" y="310" width="240" height="32" rx="8" fill="#14213d"/><rect x="20" y="334" width="240" height="8" fill="#14213d"/><text x="30" y="331" fill="#fff" font-size="14" font-weight="700">favorites</text><text x="250" y="331" fill="#c8d1e6" font-size="10.5" text-anchor="end">Favoris (N–N)</text><text x="30" y="357" font-size="12" fill="#14213d" font-weight="700">id</text><text x="250" y="357" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="30" y="378" font-size="12" fill="#1f4fd1" font-weight="700">user_id</text><text x="250" y="378" font-size="10.5" fill="#5e6880" text-anchor="end">FK → users</text><text x="30" y="399" font-size="12" fill="#1f4fd1" font-weight="700">product_id</text><text x="250" y="399" font-size="10.5" fill="#5e6880" text-anchor="end">FK → products</text><text x="30" y="420" font-size="12" fill="#14213d" font-weight="700">(user_id, product_id)</text><text x="250" y="420" font-size="10.5" fill="#5e6880" text-anchor="end">unique</text></g><g><rect x="830" y="310" width="240" height="250" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="830" y="310" width="240" height="32" rx="8" fill="#14213d"/><rect x="830" y="334" width="240" height="8" fill="#14213d"/><text x="840" y="331" fill="#fff" font-size="14" font-weight="700">products</text><text x="1060" y="331" fill="#c8d1e6" font-size="10.5" text-anchor="end">PDF : Produit</text><text x="840" y="357" font-size="12" fill="#14213d" font-weight="700">id</text><text x="1060" y="357" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="840" y="378" font-size="12" fill="#14213d" font-weight="400">code</text><text x="1060" y="378" font-size="10.5" fill="#5e6880" text-anchor="end">unique · Pr-000001</text><text x="840" y="399" font-size="12" fill="#14213d" font-weight="400">designation</text><text x="840" y="420" font-size="12" fill="#14213d" font-weight="400">unit_price</text><text x="1060" y="420" font-size="10.5" fill="#5e6880" text-anchor="end">DECIMAL(10,2)</text><text x="840" y="441" font-size="12" fill="#14213d" font-weight="400">family</text><text x="1060" y="441" font-size="10.5" fill="#5e6880" text-anchor="end">PA|BU|FO|LI</text><text x="840" y="462" font-size="12" fill="#1f4fd1" font-weight="700">supplier_id</text><text x="1060" y="462" font-size="10.5" fill="#5e6880" text-anchor="end">FK → suppliers</text><text x="840" y="483" font-size="12" fill="#14213d" font-weight="400">stock · low_stock_threshold</text><text x="840" y="504" font-size="12" fill="#14213d" font-weight="400">image_path</text><text x="840" y="525" font-size="12" fill="#14213d" font-weight="400">is_listed</text><text x="1060" y="525" font-size="10.5" fill="#5e6880" text-anchor="end">visible en boutique</text><text x="840" y="546" font-size="12" fill="#14213d" font-weight="400">archived_at</text><text x="1060" y="546" font-size="10.5" fill="#5e6880" text-anchor="end">archivage</text></g><g><rect x="830" y="20" width="240" height="187" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="830" y="20" width="240" height="32" rx="8" fill="#14213d"/><rect x="830" y="44" width="240" height="8" fill="#14213d"/><text x="840" y="41" fill="#fff" font-size="14" font-weight="700">order_lines</text><text x="1060" y="41" fill="#c8d1e6" font-size="10.5" text-anchor="end">PDF : Ligne Commande</text><text x="840" y="67" font-size="12" fill="#14213d" font-weight="700">id</text><text x="1060" y="67" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="840" y="88" font-size="12" fill="#1f4fd1" font-weight="700">order_id</text><text x="1060" y="88" font-size="10.5" fill="#5e6880" text-anchor="end">FK → orders</text><text x="840" y="109" font-size="12" fill="#1f4fd1" font-weight="700">product_id</text><text x="1060" y="109" font-size="10.5" fill="#5e6880" text-anchor="end">FK → products</text><text x="840" y="130" font-size="12" fill="#14213d" font-weight="400">quantity</text><text x="1060" y="130" font-size="10.5" fill="#5e6880" text-anchor="end">&gt; 0</text><text x="840" y="151" font-size="12" fill="#14213d" font-weight="400">unit_price</text><text x="1060" y="151" font-size="10.5" fill="#5e6880" text-anchor="end">prix figé</text><text x="840" y="172" font-size="12" fill="#14213d" font-weight="400">line_total</text><text x="840" y="193" font-size="12" fill="#14213d" font-weight="700">(order_id, product_id)</text><text x="1060" y="193" font-size="10.5" fill="#5e6880" text-anchor="end">unique</text></g><g><rect x="560" y="310" width="240" height="145" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="560" y="310" width="240" height="32" rx="8" fill="#14213d"/><rect x="560" y="334" width="240" height="8" fill="#14213d"/><text x="570" y="331" fill="#fff" font-size="14" font-weight="700">suppliers</text><text x="790" y="331" fill="#c8d1e6" font-size="10.5" text-anchor="end">PDF : Fournisseur</text><text x="570" y="357" font-size="12" fill="#14213d" font-weight="700">id</text><text x="790" y="357" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="570" y="378" font-size="12" fill="#14213d" font-weight="400">code</text><text x="790" y="378" font-size="10.5" fill="#5e6880" text-anchor="end">unique · Fr-000001</text><text x="570" y="399" font-size="12" fill="#14213d" font-weight="400">name</text><text x="570" y="420" font-size="12" fill="#14213d" font-weight="400">city</text><text x="570" y="441" font-size="12" fill="#14213d" font-weight="400">archived_at</text><text x="790" y="441" font-size="10.5" fill="#5e6880" text-anchor="end">archivage</text></g><line x1="260" y1="169.5" x2="290" y2="169.5" stroke="#1f4fd1" stroke-width="1.6"/><text x="263" y="164.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="start">0..1</text><text x="287" y="184.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="end">1</text><line x1="530" y1="148.5" x2="560" y2="148.5" stroke="#1f4fd1" stroke-width="1.6"/><text x="533" y="143.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="start">1</text><text x="557" y="163.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="end">N</text><line x1="800" y1="85.5" x2="830" y2="85.5" stroke="#1f4fd1" stroke-width="1.6"/><text x="803" y="80.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="start">1</text><text x="827" y="100.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="end">N</text><line x1="950" y1="310" x2="950" y2="207" stroke="#1f4fd1" stroke-width="1.6"/><text x="956" y="291.46" font-size="12" font-weight="700" fill="#1f4fd1">1</text><text x="956" y="232.75" font-size="12" font-weight="700" fill="#1f4fd1">N</text><line x1="800" y1="459.5" x2="830" y2="459.5" stroke="#1f4fd1" stroke-width="1.6"/><text x="803" y="454.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="start">1</text><text x="827" y="474.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="end">N</text><line x1="140" y1="186" x2="140" y2="310" stroke="#1f4fd1" stroke-width="1.6"/><text x="146" y="208.32" font-size="12" font-weight="700" fill="#1f4fd1">1</text><text x="146" y="279.0" font-size="12" font-weight="700" fill="#1f4fd1">N</text><polyline points="140,434 140,578 890,578 890,560" fill="none" stroke="#1f4fd1" stroke-width="1.6"/><text x="146" y="450" font-size="12" font-weight="700" fill="#1f4fd1">N</text><text x="896" y="574" font-size="12" font-weight="700" fill="#1f4fd1">1</text></svg><!--/ER--></div>
+    <aside class="notes">
+        <p>Voici la base. Les cinq entités du sujet : clients, orders, order_lines, products, suppliers. Nous avons ajouté users pour la connexion et favorites pour les favoris.</p>
+        <p>« 1 » et « N » : combien de lignes se correspondent. En bleu : les clés étrangères.</p>
+        <p>Suivre une flèche : un client, plusieurs commandes ; une commande, plusieurs lignes ; une ligne, un produit ; un produit, un fournisseur.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="3" data-section="Base de données" data-time="≈ 2 min 30">
+    <p class="kicker"><span class="num">3</span> Relations</p>
+    <h2>Les relations dans les modèles Eloquent</h2>
+    <div class="body cols-2">
+        <table class="t">
+            <thead><tr><th>Relation</th><th>Méthodes</th></tr></thead>
+            <tbody>
+            <tr><td>Client 1 → N Commande</td><td><code>orders()</code> · <code>client()</code></td></tr>
+            <tr><td>Commande 1 → N Ligne</td><td><code>lines()</code></td></tr>
+            <tr><td>Produit 1 → N Ligne</td><td><code>orderLines()</code></td></tr>
+            <tr><td>Fournisseur 1 → N Produit</td><td><code>products()</code> · <code>supplier()</code></td></tr>
+            <tr><td>Compte N ↔ N Produit</td><td><code>favoriteProducts()</code></td></tr>
+            </tbody>
+        </table>
+        <div>
+            <p class="code-file">app/Models/Product.php</p>
+            <div class="excerpt" data-file="app/Models/Product.php"><pre class="code">public function supplier(): BelongsTo
+{
+    return $this->belongsTo(Supplier::class);
+}</pre></div>
+            <p class="code-file" style="margin-top: 16px">…_create_order_lines_table.php</p>
+            <div class="excerpt" data-file="database/migrations/2026_11_23_000005_create_order_lines_table.php"><pre class="code">$table->unique(['order_id', 'product_id']);</pre></div>
+            <p class="small" style="margin-top: 12px">Un produit apparaît <strong>une seule fois</strong> par commande : la paire du PDF.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Dans le code, chaque flèche devient une méthode : on écrit $product->supplier sans SQL.</p>
+        <p>Point important : la ligne de commande a son id, mais aussi un index unique sur le couple commande / produit, comme la clé du PDF.</p>
+        <p class="handoff">Passage : « Comment Laravel relie tout ça à une page web ? La partie 4 présente la pile et le cycle d’une requête. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 4 · Pile Laravel et MVC (≈ 2 min 30)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="4" data-section="Pile et MVC" data-time="≈ 2 min 30">
+    <p class="kicker"><span class="num">4</span> La pile technique</p>
+    <h2>Laravel, et où trouver chaque chose</h2>
+    <div class="body cols-2">
+        <div class="cards cards-2">
+            <div class="card"><h3>Laravel 12.73</h3><p>PHP 8.2 · Composer</p></div>
+            <div class="card"><h3>SQLite</h3><p>un fichier ; MySQL possible</p></div>
+            <div class="card"><h3>Blade</h3><p>gabarits HTML</p></div>
+            <div class="card"><h3>CSS + un peu de JS</h3><p>sans outil de build</p></div>
+            <div class="card accent" style="grid-column: 1 / -1"><h3>Bibliothèques</h3><p>dompdf (PDF) · PhpSpreadsheet (Excel)</p></div>
+        </div>
+        <pre class="code" style="font-size: 16px">routes/web.php       <span class="c">← les adresses</span>
+app/Http/Controllers <span class="c">← les contrôleurs</span>
+app/Models           <span class="c">← les modèles</span>
+app/Services         <span class="c">← panier, commande, prix</span>
+database/migrations  <span class="c">← les tables</span>
+database/seeders     <span class="c">← les données de démo</span>
+resources/views      <span class="c">← les vues Blade</span>
+public/css, public/js
+tests/               <span class="c">← 64 tests</span>
+docs/                <span class="c">← le guide HTML</span></pre>
+    </div>
+    <aside class="notes">
+        <p>La pile est volontairement simple : Laravel, SQLite, Blade, du CSS et un peu de JavaScript facultatif.</p>
+        <p>Laravel impose une place pour chaque fichier ; c’est ce qui permet de s’y retrouver.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="4" data-section="Pile et MVC" data-time="≈ 2 min 30">
+    <p class="kicker"><span class="num">4</span> MVC</p>
+    <h2>Le trajet de <code>GET /produits/Pr-000017</code></h2>
+    <div class="flow">
+        <div class="step"><b>Navigateur</b>envoie la requête</div><div class="arrow">→</div>
+        <div class="step"><b>Route</b><code>catalog.show</code></div><div class="arrow">→</div>
+        <div class="step"><b>Modèle</b>trouve le produit par son code</div><div class="arrow">→</div>
+        <div class="step"><b>Contrôleur</b>prépare les données</div><div class="arrow">→</div>
+        <div class="step"><b>Vue</b><code>catalog/show</code> produit le HTML</div>
+    </div>
+    <div class="body cols-2">
+        <div>
+            <p class="code-file">routes/web.php</p>
+            <div class="excerpt" data-file="routes/web.php"><pre class="code" style="font-size: 14.5px">Route::get('/produits/{product:code}', [CatalogController::class, 'show'])->name('catalog.show');</pre></div>
+            <p class="small" style="margin-top: 14px"><code>{product:code}</code> : Laravel cherche le <code>Product</code> dont le code vaut Pr-000017, ou répond 404.</p>
+        </div>
+        <div>
+            <p class="code-file">app/Http/Controllers/CatalogController.php</p>
+            <div class="excerpt" data-file="app/Http/Controllers/CatalogController.php"><pre class="code" style="font-size: 15px">public function show(Request $request, Product $product)
+{
+    // …
+    $product->load('supplier');
+    // …
+    return view('catalog.show', compact('product', 'isFavorite', 'related'));</pre></div>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>MVC : le Modèle parle à la base, le Contrôleur coordonne, la Vue affiche.</p>
+        <p>Exemple : ouvrir la fiche Pr-000017. La route trouve le contrôleur, la liaison de modèle trouve le produit, la vue renvoie le HTML. Les « // … » marquent les lignes omises.</p>
+        <p class="handoff">Passage : « Une route peut aussi recevoir un formulaire : la partie 5 suit une vraie route POST. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 5 · Routes, méthodes HTTP, validation (≈ 2 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="5" data-section="Routes et validation" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">5</span> Une route réelle</p>
+    <h2>« Ajouter au panier » → <code>POST /panier</code></h2>
+    <div class="body cols-2">
+        <div>
+            <p class="code-file">routes/web.php</p>
+            <div class="excerpt" data-file="routes/web.php"><pre class="code" style="font-size: 15px">Route::post('/panier', [CartController::class, 'store'])->name('cart.store');</pre></div>
+            <ul style="margin-top: 20px">
+                <li class="small">Le bouton est un formulaire avec <code>@csrf</code> (sinon : erreur 419).</li>
+                <li class="small">Le nom <code>cart.store</code> sert à écrire <code>route('cart.store')</code> dans les vues.</li>
+            </ul>
+        </div>
+        <div>
+            <p class="code-file">app/Http/Controllers/CartController.php</p>
+            <div class="excerpt" data-file="app/Http/Controllers/CartController.php"><pre class="code" style="font-size: 15px">$data = $request->validate([
+    'product_id' => ['required', 'integer', 'exists:products,id'],
+    'quantity' => ['nullable', 'integer', 'min:1', 'max:'.config('shop.max_quantity')],
+]);</pre></div>
+            <p class="small" style="margin-top: 14px">Données invalides → retour au formulaire avec les messages en français (<code>lang/fr/validation.php</code>).</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Je prends une route réelle : le bouton Ajouter au panier envoie POST /panier, nom cart.store, méthode CartController@store.</p>
+        <p>La première ligne du contrôleur valide les données : produit existant, quantité entre 1 et 99.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="5" data-section="Routes et validation" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">5</span> Méthodes HTTP</p>
+    <h2>Quatre méthodes pour un même panier</h2>
+    <div class="body cols-60">
+        <table class="t">
+            <thead><tr><th>Méthode</th><th>Adresse</th><th>Action</th></tr></thead>
+            <tbody>
+            <tr><td><span class="m get">GET</span></td><td><code>/panier</code></td><td>afficher le panier</td></tr>
+            <tr><td><span class="m post">POST</span></td><td><code>/panier</code></td><td>ajouter un article</td></tr>
+            <tr><td><span class="m patch">PATCH</span></td><td><code>/panier/{product}</code></td><td>changer la quantité</td></tr>
+            <tr><td><span class="m delete">DELETE</span></td><td><code>/panier/{product}</code></td><td>retirer l’article</td></tr>
+            </tbody>
+        </table>
+        <div>
+            <p class="small">Un formulaire HTML ne connaît que GET et POST :</p>
+            <div class="excerpt" data-file="resources/views/cart/index.blade.php"><pre class="code" style="font-size: 15px">@csrf
+@method('PATCH')</pre></div>
+            <div class="card red" style="margin-top: 18px"><h3>Validation qui échoue</h3><p>Quantité 3 pour l’étiqueteuse (stock 2) : « Stock insuffisant : il reste 2 exemplaire(s)… ».</p></div>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>GET lit, POST crée, PATCH modifie, DELETE supprime. Laravel fait passer PATCH et DELETE par un champ caché grâce à @method.</p>
+        <p>Démonstration possible : sur /produits/Pr-000015, demander 3 étiqueteuses, le message apparaît sous le bouton.</p>
+        <p class="handoff">Passage : « Certaines routes sont réservées : la partie 6 explique la connexion et les rôles. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 6 · Authentification et rôles (≈ 2 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="6" data-section="Connexion et rôles" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">6</span> Authentification</p>
+    <h2>S’inscrire et se connecter</h2>
+    <div class="flow">
+        <div class="step"><b>Formulaire</b><code>POST /inscription</code></div><div class="arrow">→</div>
+        <div class="step"><b>Validation</b>e-mail valide, mot de passe fort</div><div class="arrow">→</div>
+        <div class="step"><b>Transaction</b>crée le client et le compte</div><div class="arrow">→</div>
+        <div class="step"><b>Connexion</b><code>Auth::login()</code></div>
+    </div>
+    <div class="body cols-2">
+        <div>
+            <p class="code-file">app/Http/Controllers/Auth/LoginController.php</p>
+            <div class="excerpt" data-file="app/Http/Controllers/Auth/LoginController.php"><pre class="code" style="font-size: 14.5px">if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+    throw ValidationException::withMessages([
+        'email' => 'Ces identifiants ne correspondent à aucun compte.',
+    ]);
+}</pre></div>
+        </div>
+        <ul>
+            <li class="small">Mot de passe : <strong>10 caractères</strong>, majuscule, minuscule, chiffre, symbole.</li>
+            <li class="small">Stocké <strong>haché</strong>, jamais en clair.</li>
+            <li class="small">Nouveau client : type « Particulier », remise <strong>0 %</strong>.</li>
+            <li class="small">10 essais de connexion par minute au maximum.</li>
+        </ul>
+    </div>
+    <aside class="notes">
+        <p>L’inscription crée deux lignes en une transaction : le client du PDF et le compte de connexion.</p>
+        <p>Auth::attempt compare le mot de passe avec le hachage enregistré.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="6" data-section="Connexion et rôles" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">6</span> Restrictions d’accès</p>
+    <h2>Middlewares et policy</h2>
+    <div class="body cols-2">
+        <table class="t">
+            <thead><tr><th>Groupe de routes</th><th>Sinon…</th></tr></thead>
+            <tbody>
+            <tr><td><code>guest</code> : inscription, connexion</td><td>retour à l’accueil</td></tr>
+            <tr><td><code>auth</code> + <code>customer</code> : commande, profil, mes données</td><td>visiteur → <code>/connexion</code> · admin → 403</td></tr>
+            <tr><td><code>auth</code> + <code>admin</code> : tout <code>/admin</code></td><td>client → 403</td></tr>
+            </tbody>
+        </table>
+        <div>
+            <p class="code-file">app/Policies/OrderPolicy.php</p>
+            <div class="excerpt" data-file="app/Policies/OrderPolicy.php"><pre class="code" style="font-size: 14.5px">public function view(User $user, Order $order): bool
+{
+    return $user->isAdmin() || ($user->client_id !== null &amp;&amp; $user->client_id === $order->client_id);
+}</pre></div>
+            <p class="small" style="margin-top: 12px">Khadija qui ouvre <code>/mes-commandes/Com-000004</code> (commande de Youssef) → <strong>403</strong>.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Les middlewares filtrent par rôle avant même le contrôleur. La policy va plus loin : elle vérifie que la commande appartient au client.</p>
+        <p class="handoff">Passage : « Maintenant que l’on sait qui peut entrer, la partie 7 ouvre la vitrine : le catalogue. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 7 · Catalogue et fiche produit (≈ 2 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="7" data-section="Catalogue" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">7</span> Catalogue</p>
+    <h2>La vitrine : <code>GET /</code></h2>
+    <div class="body cols-40">
+        <div>
+            <ul>
+                <li class="small">Seuls les produits <strong>disponibles</strong> : non archivés et visibles.</li>
+                <li class="small"><code>with('supplier')</code> : une requête pour tous les fournisseurs.</li>
+                <li class="small"><code>paginate(12)</code> : 12 cartes par page.</li>
+            </ul>
+            <p class="code-file" style="margin-top: 14px">app/Models/Product.php</p>
+            <div class="excerpt" data-file="app/Models/Product.php"><pre class="code" style="font-size: 15px">public function scopeAvailable(Builder $query): Builder
+{
+    return $query->active()->where('is_listed', true);
+}</pre></div>
+        </div>
+        <figure class="shot"><img src="img/desktop-01-catalog.png" alt="Catalogue avec bandeau, filtres et cartes produits"></figure>
+    </div>
+    <aside class="notes">
+        <p>Le catalogue appelle Product::available() : une portée qui résume la règle « non archivé et visible en boutique ».</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="7" data-section="Catalogue" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">7</span> Fiche produit et design</p>
+    <h2>Tout pour acheter au même endroit</h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/desktop-03-product-added.png" alt="Fiche produit avec prix, stock, quantité et message Ajouté au panier"><figcaption><code>/produits/Pr-000017</code> après un ajout.</figcaption></figure>
+        <ul>
+            <li class="small">Prix, stock, quantité −/+ et bouton dans un même encadré.</li>
+            <li class="small">Badges : <strong>En stock</strong>, <strong>Plus que 3 en stock</strong>, <strong>Rupture de stock</strong>.</li>
+            <li class="small">Couleurs : encre bleue, boutons cobalt, papier blanc.</li>
+            <li class="small">Titres condensés, cartes de même hauteur.</li>
+            <li class="small">Produit masqué ou archivé → <strong>404</strong>.</li>
+        </ul>
+    </div>
+    <aside class="notes">
+        <p>La fiche regroupe ce qu’il faut pour acheter. Les badges de stock viennent du composant stock-badge.</p>
+        <p class="handoff">Passage : « Trente produits, c’est beaucoup à parcourir : la partie 8 montre la recherche et les filtres. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 8 · Recherche, filtres, tri, pagination (≈ 2 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="8" data-section="Recherche et filtres" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">8</span> Recherche</p>
+    <h2>Les filtres vivent dans l’adresse</h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/desktop-02-catalog-filtered.png" alt="Catalogue filtré sur Bureautique, prix maximum 100 DH, tri prix décroissant"></figure>
+        <div>
+            <pre class="code" style="font-size: 16px; white-space: pre-wrap">/?family=BU
+ &amp;max_price=100
+ &amp;sort=price_desc</pre>
+            <p class="small" style="margin-top: 14px">→ <strong>6 articles</strong> de Bureautique à 100 DH ou moins, du plus cher au moins cher.</p>
+            <p class="small">Formulaire en <strong>GET</strong> : l’adresse se partage et la pagination garde les filtres.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Démonstration : choisir Bureautique, prix maximum 100, tri prix décroissant. On obtient 6 articles, de la calculatrice (89 DH) au classeur (22 DH).</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="8" data-section="Recherche et filtres" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">8</span> Dans le code</p>
+    <h2>Un filtre n’est appliqué que s’il existe</h2>
+    <p class="code-file">app/Models/Product.php</p>
+    <div class="excerpt" data-file="app/Models/Product.php"><pre class="code" style="font-size: 15.5px">->when($filters['q'] ?? null, function ($q, $search) {
+    $q->where(fn ($w) => $w->where('designation', 'like', "%{$search}%")
+        ->orWhere('code', 'like', "%{$search}%"));
+})
+->when($filters['family'] ?? null, fn ($q, $family) => $q->where('family', $family))</pre></div>
+    <div class="cards cards-3" style="margin-top: 20px">
+        <div class="card"><h3>Recherche</h3><p>Nom <strong>ou</strong> code : « Pr-000012 » trouve la calculatrice.</p></div>
+        <div class="card"><h3>Pagination</h3><p><code>paginate(12)->withQueryString()</code></p></div>
+        <div class="card amber"><h3>Valeur fantaisiste</h3><p><code>?family=XX</code> est ignorée, la page s’affiche.</p></div>
+    </div>
+    <aside class="notes">
+        <p>when() n’ajoute la condition que si le filtre est rempli. La recherche porte sur la désignation ou le code.</p>
+        <p class="handoff">Passage : « Un article qui plaît, on le garde : la partie 9 présente les favoris, le profil et l’usage sur téléphone. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 9 · Favoris, profil, mobile (≈ 2 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="9" data-section="Favoris, profil, mobile" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">9</span> Favoris et profil</p>
+    <h2>Garder un produit, gérer son adresse</h2>
+    <div class="body cols-2">
+        <div class="card accent">
+            <h3>Favoris : un cœur, une ligne pivot</h3>
+            <div class="excerpt" data-file="app/Http/Controllers/FavoriteController.php"><pre class="code" style="font-size: 14px">$result = $request->user()->favoriteProducts()->toggle($product->id);</pre></div>
+            <p style="margin-top: 10px"><code>toggle()</code> ajoute ou retire la ligne de la table <code>favorites</code>. Page : <code>/favoris</code>.</p>
+        </div>
+        <div class="card">
+            <h3>Profil : <code>/profil</code></h3>
+            <p>Nom, e-mail, rue, code postal, ville.</p>
+            <div class="excerpt" data-file="app/Http/Controllers/ProfileController.php"><pre class="code" style="font-size: 14px">// Only the address fields: type and discount are NOT taken from the form.</pre></div>
+            <p style="margin-top: 10px">Le type de client et la remise : seulement l’administrateur.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Le cœur envoie un petit formulaire. Avec JavaScript, la page ne se recharge pas : le cœur se remplit tout de suite.</p>
+        <p>Sur le profil, le client change son adresse ; il ne peut pas se donner une remise.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="9" data-section="Favoris, profil, mobile" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">9</span> Sur téléphone</p>
+    <h2>La même boutique sur un écran de 390 px</h2>
+    <div class="body cols-2 center">
+        <div class="cards cards-2">
+            <figure class="shot phone"><img src="img/mobile-01-catalog.png" alt="Catalogue sur téléphone"></figure>
+            <figure class="shot phone"><img src="img/mobile-02-filter-sheet.png" alt="Panneau des filtres ouvert depuis le bas"></figure>
+        </div>
+        <ul>
+            <li class="small">Recherche en pleine largeur, familles qui défilent.</li>
+            <li class="small">Filtres : un panneau qui <strong>monte du bas</strong>, Échap pour fermer.</li>
+            <li class="small">Cartes sur 2 colonnes, tableaux en lignes empilées.</li>
+            <li class="small">Animations courtes, coupées si le système demande moins de mouvement.</li>
+        </ul>
+    </div>
+    <aside class="notes">
+        <p>Sur téléphone, les filtres deviennent un panneau qui s’ouvre depuis le bas. Tout fonctionne aussi sans JavaScript.</p>
+        <p class="handoff">Passage : « Revenons à l’achat : la partie 10 ouvre le panier. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 10 · Panier (≈ 2 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="10" data-section="Panier" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">10</span> Panier</p>
+    <h2>Le panier vit dans la session</h2>
+    <div class="body cols-2">
+        <div>
+            <p class="code-file">app/Services/Cart.php</p>
+            <div class="excerpt" data-file="app/Services/Cart.php"><pre class="code" style="font-size: 15px">public function set(int $productId, int $quantity): void
+{
+    $items = $this->items();
+
+    if ($quantity &lt;= 0) {
+        unset($items[$productId]);
+    } else {
+        $items[$productId] = $quantity;
+    }
+
+    session([self::KEY => $items]);
+}</pre></div>
+        </div>
+        <div>
+            <p class="small">Contenu de la session après deux ajouts :</p>
+            <pre class="code" style="font-size: 18px">'cart' => [1 => 3, 17 => 2]</pre>
+            <ul style="margin-top: 16px">
+                <li class="small">Seulement <strong>id produit → quantité</strong>.</li>
+                <li class="small"><strong>Aucun prix</strong> : il est relu en base.</li>
+                <li class="small">Un visiteur peut remplir son panier avant de se connecter.</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Le panier est un simple tableau rangé dans la session : identifiant du produit, quantité. Pas de prix, donc impossible de le trafiquer.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="10" data-section="Panier" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">10</span> Quantités et totaux</p>
+    <h2>Les totaux sont calculés par le serveur</h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/desktop-05-cart.png" alt="Panier avec quantités, sous-total, remise de 10 % et total"></figure>
+        <ul>
+            <li class="small"><code>Cart::summary()</code> relit chaque produit et son prix <strong>actuel</strong>.</li>
+            <li class="small">Sous-total, remise du client connecté, total : <code>PriceCalculator::totals()</code>.</li>
+            <li class="small">Quantité > stock : ligne en rouge, bouton « Passer la commande » désactivé.</li>
+            <li class="small">Changer une quantité : <span class="m patch">PATCH</span> · retirer : <span class="m delete">DELETE</span>.</li>
+        </ul>
+    </div>
+    <aside class="notes">
+        <p>À chaque affichage du panier, le serveur recalcule tout avec les prix du moment et la remise du client.</p>
+        <p class="handoff">Passage : « Le panier est prêt : la partie 11 passe la commande. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 11 · Commande, remise, prix figés (≈ 3 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="11" data-section="Passer commande" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">11</span> Checkout</p>
+    <h2>Vérifier et confirmer : <code>/commande</code></h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/desktop-06-checkout.png" alt="Page Vérifier et confirmer avec articles, adresse, choix du paiement et total"></figure>
+        <div>
+            <div class="excerpt" data-file="app/Http/Controllers/CheckoutController.php"><pre class="code" style="font-size: 13.5px">'payment_terms' => ['required', Rule::in(array_keys(Order::PAYMENT_TERMS))],
+'checkout_token' => ['required', 'uuid'],</pre></div>
+            <ul style="margin-top: 14px">
+                <li class="small">Choix obligatoire : <strong>LIV</strong> ou <strong>T30</strong>.</li>
+                <li class="small">Un <strong>jeton unique</strong> caché dans le formulaire.</li>
+                <li class="small"><code>OrderService::placeOrder()</code> fait le reste.</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>La page résume les articles, l’adresse et demande la condition de paiement. Le formulaire contient un jeton unique, qui servira contre les doubles clics.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="11" data-section="Passer commande" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">11</span> Calcul de la remise</p>
+    <h2>3 ramettes + 2 boîtes de stylos, remise 10 %</h2>
+    <div class="body cols-2">
+        <table class="t">
+            <tbody>
+            <tr><td>3 × 49,90 DH (Pr-000001)</td><td style="text-align:right">149,70</td></tr>
+            <tr><td>2 × 65,00 DH (Pr-000017)</td><td style="text-align:right">130,00</td></tr>
+            <tr><td><strong>Sous-total</strong></td><td style="text-align:right"><strong>279,70</strong></td></tr>
+            <tr><td>Remise client 10 %</td><td style="text-align:right">− 27,97</td></tr>
+            <tr><td><strong>Total</strong></td><td style="text-align:right; font-size: 26px"><strong>251,73 DH</strong></td></tr>
+            </tbody>
+        </table>
+        <div>
+            <p class="code-file">app/Services/PriceCalculator.php</p>
+            <div class="excerpt" data-file="app/Services/PriceCalculator.php"><pre class="code" style="font-size: 15px">public static function discount(int $subtotalCents, int $rate): int
+{
+    return intdiv($subtotalCents * $rate + 50, 100);
+}</pre></div>
+            <p class="small" style="margin-top: 14px">Calcul en <strong>centimes entiers</strong> : (27 970 × 10 + 50) ÷ 100 = 2 797. Arrondi au centime, moitié vers le haut.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Exemple avec Khadija, remise 10 %. Tout est calculé en centimes pour éviter les erreurs des nombres à virgule.</p>
+        <p>La remise utilisée est celle du client au moment de la commande.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="11" data-section="Passer commande" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">11</span> Prix figés</p>
+    <h2>Le prix est copié dans la ligne au moment de la commande</h2>
+    <div class="body cols-60">
+        <div>
+            <p class="code-file">app/Services/OrderService.php</p>
+            <div class="excerpt" data-file="app/Services/OrderService.php"><pre class="code" style="font-size: 15px">$lines[] = [
+    'product_id' => $product->id,
+    'quantity' => $quantity,
+    'unit_price' => $product->unit_price, // price frozen now
+];</pre></div>
+            <ul style="margin-top: 16px">
+                <li class="small">La commande garde aussi <code>discount_rate</code>, <code>subtotal</code>, <code>discount_amount</code>, <code>total</code>.</li>
+                <li class="small">La condition de paiement (<code>payment_terms</code>) est enregistrée avec elle.</li>
+            </ul>
+        </div>
+        <figure class="shot"><img src="img/desktop-08-confirmation.png" alt="Confirmation de commande avec numéro"></figure>
+    </div>
+    <aside class="notes">
+        <p>Au moment de confirmer, le prix du catalogue est copié dans la ligne : il ne bougera plus. La partie 12 montre pourquoi c’est important.</p>
+        <p class="handoff">Passage : « Que se passe-t-il exactement dans la base ? Je passe la parole à la partie 12. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 12 · Lignes, prix historiques, stock, transaction (≈ 2 min 30)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="12" data-section="Lignes et transaction" data-time="≈ 2 min 30">
+    <p class="kicker"><span class="num">12</span> Prix historiques</p>
+    <h2>Com-000001 se souvient de l’ancien prix</h2>
+    <table class="t">
+        <thead><tr><th>Produit</th><th>Prix dans la commande</th><th>Prix du catalogue aujourd’hui</th></tr></thead>
+        <tbody>
+        <tr><td>Ramette papier A4 (Pr-000001) × 4</td><td><strong>45,00 DH</strong></td><td>49,90 DH</td></tr>
+        <tr><td>Stylos bille bleus (Pr-000017) × 1</td><td>65,00 DH</td><td>65,00 DH</td></tr>
+        <tr><td>Surligneurs fluo (Pr-000019) × 2</td><td>19,90 DH</td><td>19,90 DH</td></tr>
+        </tbody>
+    </table>
+    <div class="cards cards-3" style="margin-top: 22px">
+        <div class="card"><span class="big">284,80</span><p>sous-total</p></div>
+        <div class="card"><span class="big">− 28,48</span><p>remise 10 %</p></div>
+        <div class="card green"><span class="big">256,32 DH</span><p>total, inchangé</p></div>
+    </div>
+    <aside class="notes">
+        <p>Les données de démonstration le prouvent : la commande Com-000001 contient des ramettes à 45 DH, alors que le catalogue affiche 49,90 DH. Le total de la commande ne change pas.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="12" data-section="Lignes et transaction" data-time="≈ 2 min 30">
+    <p class="kicker"><span class="num">12</span> Stock et transaction</p>
+    <h2>Tout ou rien</h2>
+    <div class="flow">
+        <div class="step"><b>1</b>Même jeton ? On renvoie la commande existante</div><div class="arrow">→</div>
+        <div class="step"><b>2</b>Relire les produits en base</div><div class="arrow">→</div>
+        <div class="step"><b>3</b>Vérifier le stock de chaque ligne</div><div class="arrow">→</div>
+        <div class="step"><b>4</b>Créer la commande et ses lignes</div><div class="arrow">→</div>
+        <div class="step"><b>5</b>Retirer le stock</div>
+    </div>
+    <div class="body cols-60">
+        <div class="excerpt" data-file="app/Services/OrderService.php"><pre class="code" style="font-size: 14.5px">$updated = Product::whereKey($line['product_id'])
+    ->where('stock', '>=', $line['quantity'])
+    ->decrement('stock', $line['quantity']);
+
+if ($updated === 0) {
+    throw new CheckoutException(['Le stock a changé pendant la commande. Veuillez réessayer.']);
+}</pre></div>
+        <ul>
+            <li class="small">Tout se passe dans <code>DB::transaction()</code> : une erreur annule tout.</li>
+            <li class="small">Le stock ne peut pas devenir négatif.</li>
+            <li class="small">Double clic : un seul <code>checkout_token</code> par commande.</li>
+        </ul>
+    </div>
+    <aside class="notes">
+        <p>Cinq étapes dans une seule transaction. Si le stock manque, une exception est lancée et rien n’est enregistré.</p>
+        <p>La condition stock >= quantité est vérifiée par la base elle-même, dernier filet de sécurité.</p>
+        <p class="handoff">Passage : « La commande existe : la partie 13 montre comment le client la suit. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 13 · Historique et statuts (≈ 2 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="13" data-section="Historique et statuts" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">13</span> Mes commandes</p>
+    <h2>L’historique du client</h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/desktop-10-orders.png" alt="Liste Mes commandes avec statuts"></figure>
+        <div>
+            <p class="small">Compte <code>client@larashop.test</code> :</p>
+            <ul>
+                <li class="small">Com-000001 · <strong>Livrée</strong></li>
+                <li class="small">Com-000002 · <strong>Expédiée</strong></li>
+                <li class="small">Com-000003 · <strong>En attente</strong></li>
+            </ul>
+            <p class="small">Détail, suivi, <strong>PDF</strong> et impression pour chaque commande.</p>
+            <p class="small">La liste ne lit que <code>client_id</code> du compte connecté.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Démonstration : connecté en tant que Khadija, ouvrir Mes commandes. Trois commandes dans trois statuts différents.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="13" data-section="Historique et statuts" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">13</span> Statuts de livraison</p>
+    <h2>Un parcours, des étapes autorisées</h2>
+    <div class="flow">
+        <div class="step"><b>En attente</b>pending</div><div class="arrow">→</div>
+        <div class="step"><b>En préparation</b>preparing</div><div class="arrow">→</div>
+        <div class="step"><b>Expédiée</b>shipped</div><div class="arrow">→</div>
+        <div class="step"><b>Livrée</b>delivered</div>
+    </div>
+    <div class="body cols-2">
+        <div class="excerpt" data-file="app/Models/Order.php"><pre class="code" style="font-size: 15px">public const NEXT_STATUSES = [
+    'pending' => ['preparing', 'cancelled'],
+    'preparing' => ['shipped', 'cancelled'],
+    'shipped' => ['delivered'],
+    'delivered' => [],
+    'cancelled' => [],
+];</pre></div>
+        <ul>
+            <li class="small"><strong>Annulée</strong> est possible avant l’expédition.</li>
+            <li class="small">Le client peut annuler seulement une commande <strong>en attente</strong>.</li>
+            <li class="small">Livrée et Annulée sont <strong>finales</strong>.</li>
+        </ul>
+    </div>
+    <aside class="notes">
+        <p>Les statuts possibles après chaque étape sont écrits dans un tableau du modèle Order. C’est une petite machine à états.</p>
+        <p class="handoff">Passage : « Qui fait avancer ces statuts ? L’administrateur : la partie 14 ouvre l’administration. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 14 · Tableau de bord et clients (≈ 2 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="14" data-section="Tableau de bord et clients" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">14</span> Administration</p>
+    <h2>Le tableau de bord : <code>/admin</code></h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/desktop-20-dashboard.png" alt="Tableau de bord avec compteurs, commandes récentes et stock faible"></figure>
+        <div>
+            <div class="excerpt" data-file="app/Http/Controllers/Admin/DashboardController.php"><pre class="code" style="font-size: 13.5px">'pending' => Order::where('status', 'pending')->count(),
+// …
+'revenue' => Order::where('status', '!=', 'cancelled')->sum('total'),</pre></div>
+            <ul style="margin-top: 14px">
+                <li class="small">Compteurs, 8 commandes récentes.</li>
+                <li class="small">Produits sous leur seuil d’alerte.</li>
+                <li class="small">Compte : <code>admin@larashop.test</code>.</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Connexion en administrateur : on arrive sur le tableau de bord. Les compteurs sont calculés par la base (count, sum).</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="14" data-section="Tableau de bord et clients" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">14</span> Clients</p>
+    <h2>Gérer les clients, sans perdre l’historique</h2>
+    <div class="body cols-2">
+        <div>
+            <p class="code-file">app/Http/Controllers/Admin/ClientController.php</p>
+            <div class="excerpt" data-file="app/Http/Controllers/Admin/ClientController.php"><pre class="code" style="font-size: 14.5px">if ($client->orders()->exists() || $client->user()->exists()) {
+    $client->archive();</pre></div>
+            <p class="small" style="margin-top: 12px">Un client avec des commandes est <strong>archivé</strong>, pas supprimé.</p>
+            <div class="excerpt" data-file="app/Http/Requests/ClientRequest.php"><pre class="code" style="font-size: 14.5px">'special_discount' => ['required', 'integer', 'between:0,100'],</pre></div>
+        </div>
+        <div class="card accent">
+            <h3>Démo</h3>
+            <p>1. Clients → <strong>Cli-000002</strong> (Youssef) → Modifier.</p>
+            <p>2. Remise spéciale : <strong>5</strong> → Enregistrer.</p>
+            <p>3. Résultat : « Client Cli-000002 mis à jour. »</p>
+            <p>4. Essai : remise <strong>101</strong> → message d’erreur sous le champ.</p>
+            <p class="small muted">Ses anciennes commandes gardent leur remise.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Le CRUD des clients : créer, lire, modifier, supprimer. La suppression devient un archivage quand le client a un historique.</p>
+        <p>Si la démo échoue : montrer l’extrait de code et le message attendu.</p>
+        <p class="handoff">Passage : « Même logique pour le catalogue : la partie 15 présente fournisseurs, produits et stock. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 15 · Fournisseurs, produits, stock : CRUD (≈ 3 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="15" data-section="Produits et stock" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">15</span> CRUD</p>
+    <h2>Une ligne de code, sept routes</h2>
+    <div class="body cols-60">
+        <table class="t">
+            <thead><tr><th>Méthode</th><th>Adresse</th><th>Action</th></tr></thead>
+            <tbody>
+            <tr><td><span class="m get">GET</span></td><td><code>/admin/produits</code></td><td>index : lister</td></tr>
+            <tr><td><span class="m get">GET</span></td><td><code>/admin/produits/create</code></td><td>create : formulaire</td></tr>
+            <tr><td><span class="m post">POST</span></td><td><code>/admin/produits</code></td><td>store : enregistrer</td></tr>
+            <tr><td><span class="m get">GET</span></td><td><code>/admin/produits/{product}/edit</code></td><td>edit : formulaire</td></tr>
+            <tr><td><span class="m put">PUT</span></td><td><code>/admin/produits/{product}</code></td><td>update : modifier</td></tr>
+            <tr><td><span class="m delete">DELETE</span></td><td><code>/admin/produits/{product}</code></td><td>destroy : supprimer</td></tr>
+            </tbody>
+        </table>
+        <div>
+            <p class="small"><code>Route::resource()</code> crée ces routes (sans « show »), plus une route « restaurer ».</p>
+            <p class="small">Même chose pour <code>/admin/fournisseurs</code> et <code>/admin/clients</code>.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>CRUD : Create, Read, Update, Delete. Laravel génère les routes standard avec Route::resource.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="15" data-section="Produits et stock" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">15</span> Démo</p>
+    <h2>Créer un produit, de bout en bout</h2>
+    <div class="body cols-2">
+        <div class="card accent">
+            <p>1. Produits et stock → <strong>+ Nouveau produit</strong>.</p>
+            <p>2. Désignation « Taille-crayon double », prix <strong>4,50</strong>, famille FO, fournisseur Fournitures du Sud, stock 20.</p>
+            <p>3. Choisir une image : l’<strong>aperçu</strong> s’affiche avant l’envoi.</p>
+            <p>4. Enregistrer → « Produit Pr-000031 créé. »</p>
+            <p>5. Décocher « Visible dans la boutique » → il disparaît du catalogue.</p>
+        </div>
+        <figure class="shot"><img src="img/admin-image-preview.png" alt="Formulaire produit avec aperçu de l’image et case Visible dans la boutique"></figure>
+    </div>
+    <aside class="notes">
+        <p>Le prix accepte la virgule française : prepareForValidation remplace 4,50 par 4.50 avant la validation.</p>
+        <p>Pr-000031 si la base vient d’être réinitialisée (30 produits seedés). Si l’envoi de l’image échoue, montrer la capture.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="15" data-section="Produits et stock" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">15</span> Fournisseurs et stock</p>
+    <h2>Stock faible et règles de suppression</h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/desktop-24-products-low.png" alt="Liste des produits filtrée sur le stock faible"><figcaption><code>/admin/produits?stock=low</code></figcaption></figure>
+        <div>
+            <div class="excerpt" data-file="app/Models/Product.php"><pre class="code" style="font-size: 14px">return $query->whereColumn('stock', '&lt;=', 'low_stock_threshold');</pre></div>
+            <ul style="margin-top: 14px">
+                <li class="small">Stock modifié par l’admin, la commande et l’annulation.</li>
+                <li class="small">Produit déjà commandé : <strong>archivé</strong>.</li>
+                <li class="small">Fournisseur qui a des produits : <strong>archivé</strong>.</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Un produit est en stock faible quand son stock est inférieur ou égal à son seuil. Supprimer ce qui sert à l’historique est interdit : on archive.</p>
+        <p class="handoff">Passage : « Côté commandes, l’administrateur fait avancer les statuts : la partie 16 le montre en direct. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 16 · Commandes côté admin (≈ 2 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="16" data-section="Commandes admin" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">16</span> Commandes</p>
+    <h2>Rechercher et filtrer les commandes</h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/desktop-21-orders.png" alt="Liste des commandes filtrée sur En attente avec boutons d’export"></figure>
+        <ul>
+            <li class="small">Recherche : numéro, nom ou code client.</li>
+            <li class="small">Filtres : statut, paiement, dates.</li>
+            <li class="small">Export des résultats au-dessus du tableau.</li>
+            <li class="small">Détail : lignes aux prix figés, PDF.</li>
+        </ul>
+    </div>
+    <aside class="notes">
+        <p>La liste des commandes accepte les mêmes filtres que les exports, présentés par la partie 17.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="16" data-section="Commandes admin" data-time="≈ 2 min">
+    <p class="kicker"><span class="num">16</span> Démo</p>
+    <h2>Changer le statut de Com-000003</h2>
+    <div class="body cols-2">
+        <div>
+            <div class="card accent">
+                <p>1. Commandes → filtre <strong>En attente</strong> → Com-000003 (Khadija).</p>
+                <p>2. Encadré Statut : <strong>En préparation</strong> → Mettre à jour.</p>
+                <p>3. Résultat : « Statut mis à jour : « En préparation ». »</p>
+            </div>
+            <div class="excerpt" data-file="app/Services/OrderService.php" style="margin-top: 14px"><pre class="code" style="font-size: 13.5px">$firstTime = Order::whereKey($order->id)
+    ->whereNull('stock_restored_at')
+    ->update(['stock_restored_at' => now()]);</pre></div>
+            <p class="small" style="margin-top: 8px">Annuler rend le stock <strong>une seule fois</strong>.</p>
+        </div>
+        <figure class="shot"><img src="img/desktop-22-order-status.png" alt="Détail d’une commande avec l’encadré Statut mis à jour"></figure>
+    </div>
+    <aside class="notes">
+        <p>Démonstration en direct. Côté client, Khadija verra « En préparation » dans Mes commandes, et ne pourra plus annuler.</p>
+        <p>Si la démo échoue : montrer la capture et l’extrait.</p>
+        <p class="handoff">Passage : « Toutes ces données peuvent sortir de l’application : la partie 17 présente les téléchargements et les exports. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 17 · Téléchargements et exports (≈ 2 min 30)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="17" data-section="Téléchargements et exports" data-time="≈ 2 min 30">
+    <p class="kicker"><span class="num">17</span> Qui télécharge quoi ?</p>
+    <h2>Chaque rôle voit seulement ce qui lui revient</h2>
+    <table class="t">
+        <thead><tr><th>Adresse</th><th>Visiteur</th><th>Client</th><th>Admin</th></tr></thead>
+        <tbody>
+        <tr><td><code>/mes-donnees</code> : profil, commandes, lignes, favoris (CSV, Excel, PDF)</td><td class="no">connexion</td><td class="yes">ses données</td><td class="no">403</td></tr>
+        <tr><td><code>/mes-commandes/{numéro}/pdf</code></td><td class="no">connexion</td><td class="yes">ses commandes</td><td class="no">403</td></tr>
+        <tr><td><code>/admin/exports/…</code> : toute la boutique</td><td class="no">connexion</td><td class="no">403</td><td class="yes">tout</td></tr>
+        </tbody>
+    </table>
+    <div class="excerpt" data-file="app/Http/Controllers/AccountDataController.php" style="margin-top: 18px"><pre class="code" style="font-size: 15px">'commandes' => ExportDatasets::orders(Order::where('client_id', $user->client_id)),</pre></div>
+    <aside class="notes">
+        <p>Côté client, chaque requête est limitée à son client_id : il ne peut tout simplement pas lire les données d’un autre. Côté admin, le middleware admin protège tout.</p>
+        <p>L’administrateur voit les commandes des clients dans /admin/commandes, et peut télécharger leurs PDF depuis l’administration.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="17" data-section="Téléchargements et exports" data-time="≈ 2 min 30">
+    <p class="kicker"><span class="num">17</span> Exports administrateur</p>
+    <h2>Des CSV qui s’ouvrent bien dans Excel</h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/desktop-23-exports.png" alt="Page Exports avec l’export complet et les tables"></figure>
+        <div>
+            <ul>
+                <li class="small"><strong>UTF-8 avec BOM</strong> : les accents s’affichent.</li>
+                <li class="small"><strong>;</strong> et virgule décimale : Excel en français.</li>
+                <li class="small">Filtres de la liste → mêmes lignes dans le fichier.</li>
+                <li class="small">Jamais de mot de passe ni de jeton.</li>
+            </ul>
+            <div class="excerpt" data-file="app/Support/CsvExport.php" style="margin-top: 10px"><pre class="code" style="font-size: 13.5px">if ($value !== '' &amp;&amp; in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+    return "'".$value;
+}</pre></div>
+            <p class="small" style="margin-top: 8px">Une cellule « =… » reste du texte : pas de formule piégée.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Démonstration : filtrer les commandes « En attente », cliquer sur Exporter ces résultats en CSV, ouvrir le fichier dans Excel.</p>
+        <p class="handoff">Passage : « Place à la démonstration complète : la partie 18 enchaîne tout, du panier jusqu’à l’administration. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 18 · Démonstration de bout en bout (≈ 4 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="18" data-section="Démonstration" data-time="≈ 4 min">
+    <p class="kicker"><span class="num">18</span> Démo · préparation</p>
+    <h2>Avant de commencer</h2>
+    <div class="body cols-2">
+        <div class="card">
+            <h3>Données de départ</h3>
+            <pre class="code" style="font-size: 16px">php artisan migrate:fresh --seed
+php artisan serve</pre>
+            <p class="small" style="margin-top: 10px">Attention : efface les données et recrée la démonstration.</p>
+        </div>
+        <div class="card accent">
+            <h3>Comptes</h3>
+            <p><strong>Client</strong> : <code>client@larashop.test</code> (Khadija, Cli-000001, remise 10 %)</p>
+            <p><strong>Admin</strong> : <code>admin@larashop.test</code></p>
+            <p>Mot de passe : <code>password</code></p>
+        </div>
+        <div class="card amber" style="grid-column: 1 / -1">
+            <h3>Plan B</h3>
+            <p>Si quelque chose ne marche pas : les deux diapositives suivantes contiennent les captures et les résultats attendus.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Avant la séance : réinitialiser la base, ouvrir deux navigateurs (ou une fenêtre privée) pour le client et l’admin.</p>
+        <p>Si la base n’a pas été réinitialisée, le numéro de commande sera différent de Com-000018.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="18" data-section="Démonstration" data-time="≈ 4 min">
+    <p class="kicker"><span class="num">18</span> Démo · l’erreur</p>
+    <h2>Acheter… et oublier le paiement</h2>
+    <div class="body cols-2">
+        <div class="card">
+            <p>1. Connexion <code>client@larashop.test</code>.</p>
+            <p>2. Rechercher « cahier » → <strong>Pr-000002</strong>, quantité <strong>4</strong> → Ajouter.</p>
+            <p>3. Rechercher « Pr-000012 » (calculatrice) → Ajouter.</p>
+            <p>4. Panier : 50,00 + 89,00 = <strong>139,00</strong>, remise <strong>13,90</strong>, total <strong>125,10 DH</strong>.</p>
+            <p>5. Passer la commande → <strong>Confirmer sans choisir</strong> de condition.</p>
+            <p class="small"><strong>Attendu</strong> : « Choisissez une condition de paiement. » sous les choix.</p>
+        </div>
+        <figure class="shot"><img src="img/desktop-07-checkout-error.png" alt="Page de commande avec le message Choisissez une condition de paiement"></figure>
+    </div>
+    <aside class="notes">
+        <p>Le but est de montrer une validation qui échoue : rien n’est enregistré, le message est placé à côté du champ.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="18" data-section="Démonstration" data-time="≈ 4 min">
+    <p class="kicker"><span class="num">18</span> Démo · correction</p>
+    <h2>Corriger, confirmer, faire avancer</h2>
+    <div class="body cols-2">
+        <div class="card green">
+            <p>6. Choisir <strong>À 30 jours</strong> → Confirmer.</p>
+            <p>7. Attendu : <strong>Com-000018</strong>, « En attente », total <strong>125,10 DH</strong>.</p>
+            <p>8. Stock : cahier 200 → 196, calculatrice 18 → 17.</p>
+            <p>9. Admin : Commandes → Com-000018 → <strong>En préparation</strong>.</p>
+            <p>10. Client : Mes commandes → « En préparation », Télécharger le PDF.</p>
+        </div>
+        <figure class="shot"><img src="img/desktop-08-confirmation.png" alt="Confirmation de commande avec le numéro"></figure>
+    </div>
+    <aside class="notes">
+        <p>Après correction, la commande est créée. Côté admin, on change le statut ; côté client, le suivi se met à jour.</p>
+        <p class="handoff">Passage : « Pour conclure et tester vos connaissances, je laisse la parole à la partie 19. »</p>
+    </aside>
+</section>
+
+<!-- =====================================================================
+     PARTIE 19 · Récapitulatif et quiz (≈ 5 min)
+     ===================================================================== -->
+<section class="slide lead-slide" data-presenter="19" data-section="Récapitulatif et quiz" data-time="≈ 5 min">
+    <p class="kicker"><span class="num">19</span> Récapitulatif</p>
+    <h2>Ce qu’il faut retenir</h2>
+    <div class="cards cards-3">
+        <div class="card"><h3>MVC</h3><p>Route → contrôleur → modèle → vue Blade.</p></div>
+        <div class="card"><h3>Base</h3><p>5 entités, clés étrangères, paire unique commande/produit.</p></div>
+        <div class="card"><h3>Sécurité</h3><p>Validation, CSRF, middlewares, policy.</p></div>
+        <div class="card accent"><h3>Commande</h3><p>Totaux serveur, remise, prix figés.</p></div>
+        <div class="card accent"><h3>Intégrité</h3><p>Transaction, stock jamais négatif, un seul jeton.</p></div>
+        <div class="card accent"><h3>Données</h3><p>Archiver plutôt que supprimer ; exports selon le rôle.</p></div>
+    </div>
+    <aside class="notes">
+        <p>Six idées à retenir. Place au quiz : prenez quelques secondes par question avant que je montre la réponse.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="19" data-section="Récapitulatif et quiz" data-time="≈ 5 min">
+    <p class="kicker"><span class="num">19</span> Quiz · questions 1 à 5</p>
+    <div class="quiz">
+        <div class="q">
+            <h3><span class="qn">1</span>Fiche <code>/produits/Pr-000017</code> : quel fichier produit le HTML ?</h3>
+            <ol><li><b>A</b>CatalogController.php</li><li class="correct"><b>B</b>catalog/show.blade.php</li><li><b>C</b>Product.php</li></ol>
+            <button type="button" class="reveal">Afficher la réponse</button>
+            <p class="answer">B. Le contrôleur prépare les données, le modèle lit la base, la vue Blade produit le HTML.</p>
+        </div>
+        <div class="q">
+            <h3><span class="qn">2</span>Changer la quantité d’une ligne du panier envoie…</h3>
+            <ol><li><b>A</b>GET /panier</li><li class="correct"><b>B</b>PATCH /panier/{product}</li><li><b>C</b>DELETE /panier/{product}</li></ol>
+            <button type="button" class="reveal">Afficher la réponse</button>
+            <p class="answer">B. Un POST avec <code>@method('PATCH')</code> : on modifie une ressource existante.</p>
+        </div>
+        <div class="q">
+            <h3><span class="qn">3</span>L’admin supprime Cli-000001, qui a des commandes. Résultat ?</h3>
+            <ol><li><b>A</b>Supprimé avec ses commandes</li><li><b>B</b>Erreur 500</li><li class="correct"><b>C</b>Archivé, historique gardé</li></ol>
+            <button type="button" class="reveal">Afficher la réponse</button>
+            <p class="answer">C. <code>destroy()</code> archive un client qui a un historique ; la clé étrangère interdit de toute façon de casser les commandes.</p>
+        </div>
+        <div class="q">
+            <h3><span class="qn">4</span>Pourquoi un index unique sur <code>(order_id, product_id)</code> ?</h3>
+            <ol><li class="correct"><b>A</b>Un produit une fois par commande</li><li><b>B</b>Accélérer le catalogue</li><li><b>C</b>Un produit dans une seule commande</li></ol>
+            <button type="button" class="reveal">Afficher la réponse</button>
+            <p class="answer">A. C’est la clé du PDF : le couple commande / produit ; un produit reste commandable par d’autres commandes.</p>
+        </div>
+        <div class="q wide">
+            <h3><span class="qn">5</span>Scénario : panier de 200,00 DH, client avec une remise de 15 %. Quel total la commande enregistre-t-elle ?</h3>
+            <ol><li><b>A</b>185,00 DH</li><li class="correct"><b>B</b>170,00 DH</li><li><b>C</b>200,00 DH, la remise est appliquée à la livraison</li></ol>
+            <button type="button" class="reveal">Afficher la réponse</button>
+            <p class="answer">B. Remise 30,00 DH calculée par le serveur avec <code>special_discount</code>, puis figée dans <code>discount_rate</code> et <code>total</code>.</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Lire chaque question, laisser répondre à main levée, puis cliquer sur « Afficher la réponse » (ou touche R pour tout montrer).</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="19" data-section="Récapitulatif et quiz" data-time="≈ 5 min">
+    <p class="kicker"><span class="num">19</span> Quiz · questions 6 à 10</p>
+    <div class="quiz">
+        <div class="q wide">
+            <h3><span class="qn">6</span>Scénario : hier, Khadija a commandé 2 ramettes à 49,90 DH. Aujourd’hui l’admin passe le prix à 55,00 DH. Que montre la commande d’hier ?</h3>
+            <ol><li class="correct"><b>A</b>Toujours 49,90 DH</li><li><b>B</b>55,00 DH</li><li><b>C</b>Une erreur</li></ol>
+            <button type="button" class="reveal">Afficher la réponse</button>
+            <p class="answer">A. Le prix est copié dans <code>order_lines.unit_price</code> à la confirmation ; le nouveau prix ne vaut que pour les prochaines commandes.</p>
+        </div>
+        <div class="q">
+            <h3><span class="qn">7</span>Il reste 2 étiqueteuses ; deux clients en commandent 2 au même moment.</h3>
+            <ol><li><b>A</b>Stock −2</li><li class="correct"><b>B</b>Une seule commande passe</li><li><b>C</b>Les deux sont annulées</li></ol>
+            <button type="button" class="reveal">Afficher la réponse</button>
+            <p class="answer">B. Transaction + condition <code>stock >= quantité</code> : le second reçoit « Stock insuffisant » ou « Le stock a changé… ».</p>
+        </div>
+        <div class="q">
+            <h3><span class="qn">8</span>Un client double-clique sur « Confirmer la commande ».</h3>
+            <ol><li class="correct"><b>A</b>1 commande</li><li><b>B</b>2 commandes</li><li><b>C</b>0 commande</li></ol>
+            <button type="button" class="reveal">Afficher la réponse</button>
+            <p class="answer">A. Le même <code>checkout_token</code> (unique) renvoie la commande déjà créée.</p>
+        </div>
+        <div class="q">
+            <h3><span class="qn">9</span>Khadija ouvre <code>/admin/exports/commandes.csv</code>.</h3>
+            <ol><li><b>A</b>Toutes les commandes</li><li><b>B</b>Seulement les siennes</li><li class="correct"><b>C</b>Page 403</li></ol>
+            <button type="button" class="reveal">Afficher la réponse</button>
+            <p class="answer">C. Middleware <code>admin</code>. Ses propres données sont dans <code>/mes-donnees</code>.</p>
+        </div>
+        <div class="q">
+            <h3><span class="qn">10</span>Une commande « Livrée » peut-elle être annulée ?</h3>
+            <ol><li><b>A</b>Oui, par l’admin</li><li class="correct"><b>B</b>Non, statut final</li><li><b>C</b>Oui, par le client</li></ol>
+            <button type="button" class="reveal">Afficher la réponse</button>
+            <p class="answer">B. <code>NEXT_STATUSES['delivered']</code> est vide : le service refuse le changement.</p>
+        </div>
+    </div>
+    <p class="small" style="margin-top: 14px; text-align: center"><strong>Merci de votre attention !</strong> Le guide complet est dans <code>docs/index.html</code>. Questions ?</p>
+    <aside class="notes">
+        <p>Après la dernière réponse : remercier le public, rappeler que le guide HTML détaille chaque fonctionnalité, puis ouvrir les questions.</p>
+        <p class="handoff">Clôture : « Merci à toutes et à tous, et merci aux 18 autres présentateurs. Nous répondons maintenant à vos questions. »</p>
+    </aside>
+</section>
+
+</div>
+</div>
+
+<div class="progress" aria-hidden="true"></div>
+<aside class="notes-panel" aria-label="Notes de l’orateur"></aside>
+<nav class="controls" aria-label="Navigation du diaporama">
+    <span class="section-label" data-section-label></span>
+    <button type="button" data-prev aria-label="Diapositive précédente">← Précédent</button>
+    <span class="counter" data-counter aria-live="polite"></span>
+    <button type="button" data-next aria-label="Diapositive suivante">Suivant →</button>
+    <button type="button" data-notes aria-pressed="false" title="Touche N">Notes</button>
+    <button type="button" data-fullscreen title="Touche F">Plein écran</button>
+    <span class="help">← → naviguer · N notes · R réponses</span>
+</nav>
+</body>
+</html>

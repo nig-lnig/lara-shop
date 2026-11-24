@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Guide Lara-Shop · Prise en main</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#contenu">Aller au contenu</a>
+<div class="layout">
+<!--NAV:index-->
+<nav class="toc" aria-label="Sommaire du guide">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">L</span> Guide Lara-Shop</a>
+<details open><summary>Sommaire</summary>
+<h2>Partie 1 · Prise en main</h2><ol>
+<li><a href="#ch1"><span class="num">1.</span>Ce que fait l’application</a></li>
+<li><a href="#ch2"><span class="num">2.</span>Lancer le projet</a></li>
+<li><a href="#ch3"><span class="num">3.</span>Se repérer dans les dossiers</a></li>
+<li><a href="#ch4"><span class="num">4.</span>Le modèle de données</a></li>
+<li><a href="#ch5"><span class="num">5.</span>Le parcours d’une requête</a></li>
+</ol>
+<h2>Partie 2 · La boutique</h2><ol>
+<li><a href="boutique.html#ch6"><span class="num">6.</span>Inscription, connexion, profil</a></li>
+<li><a href="boutique.html#ch7"><span class="num">7.</span>Catalogue et fiche produit</a></li>
+<li><a href="boutique.html#ch8"><span class="num">8.</span>Recherche, filtres, tri</a></li>
+<li><a href="boutique.html#ch9"><span class="num">9.</span>Favoris</a></li>
+<li><a href="boutique.html#ch10"><span class="num">10.</span>Panier</a></li>
+<li><a href="boutique.html#ch11"><span class="num">11.</span>Passer commande</a></li>
+<li><a href="boutique.html#ch12"><span class="num">12.</span>Mes commandes et statuts</a></li>
+<li><a href="boutique.html#ch13"><span class="num">13.</span>Mes données</a></li>
+</ol>
+<h2>Partie 3 · L’administration</h2><ol>
+<li><a href="admin.html#ch14"><span class="num">14.</span>Tableau de bord</a></li>
+<li><a href="admin.html#ch15"><span class="num">15.</span>Clients (CRUD)</a></li>
+<li><a href="admin.html#ch16"><span class="num">16.</span>Fournisseurs (CRUD)</a></li>
+<li><a href="admin.html#ch17"><span class="num">17.</span>Produits, images, stock</a></li>
+<li><a href="admin.html#ch18"><span class="num">18.</span>Commandes (admin)</a></li>
+<li><a href="admin.html#ch19"><span class="num">19.</span>Exports CSV, Excel, PDF</a></li>
+</ol>
+<h2>Partie 4 · Références</h2><ol>
+<li><a href="reference.html#ch20"><span class="num">20.</span>Notions Laravel</a></li>
+<li><a href="reference.html#ch21"><span class="num">21.</span>Interface et JavaScript</a></li>
+<li><a href="reference.html#ch22"><span class="num">22.</span>Tests automatisés</a></li>
+<li><a href="reference.html#ch23"><span class="num">23.</span>Écarts observés</a></li>
+<li><a href="reference.html#ch24"><span class="num">24.</span>Glossaire</a></li>
+<li><a href="reference.html#ch25"><span class="num">25.</span>Routes et fonctionnalités</a></li>
+</ol>
+</details></nav>
+<!--/NAV-->
+
+<main id="contenu">
+    <div class="hero-intro">
+        <p class="eyebrow">Guide pédagogique · Laravel 12 · LP-ISIR 2026/2027</p>
+        <h1>Comprendre Lara-Shop, une boutique en ligne écrite avec Laravel</h1>
+        <p>Ce guide explique, fichier par fichier, l’application terminée de ce dossier : une boutique de papeterie et de
+            fournitures de bureau construite à partir du sujet PDF (Client, Commande, Fournisseur, Produit, Ligne Commande).
+            Chaque fonctionnalité est suivie depuis le clic de l’utilisateur jusqu’au résultat, avec de vrais extraits du code.</p>
+        <p class="lead">Il s’ouvre directement dans le navigateur : inutile de lancer Laravel pour le lire.</p>
+    </div>
+
+    <div class="callout note">
+        <strong>Comment lire ce guide</strong>
+        <p>La <a href="#ch1">partie 1</a> donne une vue d’ensemble : lancer le projet, se repérer dans les dossiers, comprendre la base
+            de données et le trajet d’une requête. Les parties <a href="boutique.html">2 (boutique)</a> et <a href="admin.html">3 (administration)</a>
+            consacrent un chapitre numéroté à chaque fonctionnalité, toujours en six étapes : <em>point de départ, fichiers, ce qui se passe,
+            résultat, ce qui peut mal tourner, notions</em>. La <a href="reference.html">partie 4</a> rassemble les notions Laravel,
+            le glossaire et le tableau des routes.</p>
+    </div>
+
+    <!-- ================================================================ -->
+    <h2 id="ch1">1. Ce que fait l’application</h2>
+    <p><strong>Lara-Shop</strong> vend 30 articles répartis en quatre familles (Papeterie, Bureautique, Fourniture, Librairie).
+        Trois types de personnes l’utilisent :</p>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Qui</th><th>Ce qu’il peut faire</th><th>Où</th></tr></thead>
+        <tbody>
+        <tr><td>Visiteur (non connecté)</td><td>Parcourir et filtrer le catalogue, voir une fiche produit, remplir un panier.</td><td><code>/</code>, <code>/produits/…</code>, <code>/panier</code></td></tr>
+        <tr><td>Client (compte <code>customer</code>)</td><td>Tout ce qui précède, plus : commander (paiement à la livraison ou à 30 jours), suivre et annuler ses commandes, gérer ses favoris, son profil, télécharger ses données (CSV, Excel, PDF).</td><td><code>/commande</code>, <code>/mes-commandes</code>, <code>/favoris</code>, <code>/profil</code>, <code>/mes-donnees</code></td></tr>
+        <tr><td>Administrateur (compte <code>admin</code>)</td><td>Tableau de bord, gestion (CRUD) des clients, fournisseurs et produits, stock, images, suivi des commandes et de leurs statuts, exports de toutes les données.</td><td><code>/admin/…</code></td></tr>
+        </tbody>
+    </table></div>
+
+    <figure class="shot">
+        <img src="img/desktop-01-catalog.png" alt="Page d’accueil de Lara-Shop : bandeau violet clair « Tout pour écrire, ranger et apprendre », puis le catalogue avec les filtres à gauche" loading="lazy">
+        <figcaption>La page d’accueil (<code>/</code>) : le bandeau d’accueil, puis le catalogue avec ses filtres.</figcaption>
+    </figure>
+
+    <h3 id="comptes">Comptes de démonstration</h3>
+    <p>Le seeder <code class="file">database/seeders/ClientSeeder.php</code> crée ces comptes. Le mot de passe est
+        <code>password</code> pour tous (les comptes créés par le formulaire d’inscription doivent, eux, respecter les règles du
+        <a href="boutique.html#ch6">chapitre 6</a>).</p>
+    <div class="table-wrap"><table>
+        <thead><tr><th>E-mail</th><th>Rôle</th><th>Particularité</th></tr></thead>
+        <tbody>
+        <tr><td><code>admin@larashop.test</code></td><td>Administrateur</td><td>Arrive sur <code>/admin</code> après connexion.</td></tr>
+        <tr><td><code>client@larashop.test</code></td><td>Client Cli-000001 (Khadija Benali)</td><td>Remise spéciale de <strong>10 %</strong>, 3 commandes, 3 favoris.</td></tr>
+        <tr><td><code>youssef@larashop.test</code></td><td>Client Cli-000002</td><td>Sans remise, possède une commande annulée.</td></tr>
+        <tr><td><code>sara@larashop.test</code></td><td>Client Cli-000008</td><td>Sans remise.</td></tr>
+        </tbody>
+    </table></div>
+    <p>Deux autres comptes existent aussi (<code>cabinet.amrani@larashop.test</code>, remise 5 %, et <code>iqraa@larashop.test</code>, remise 20 %).</p>
+
+    <!-- ================================================================ -->
+    <h2 id="ch2">2. Lancer le projet sur son ordinateur</h2>
+    <p>Il faut PHP 8.2 ou plus récent (le projet a été développé avec PHP 8.2.26 et Laravel 12.73) et Composer. Les
+        extensions PHP utilisées sont <code>pdo_sqlite</code>, <code>mbstring</code>, <code>zip</code>, <code>gd</code> et <code>xml</code>
+        (toutes présentes dans WAMP/XAMPP).</p>
+    <pre><code>composer install
+cp .env.example .env          <span class="c"># Windows : copy .env.example .env</span>
+php artisan key:generate
+php artisan migrate --seed    <span class="c"># crée database/database.sqlite et les données de démonstration</span>
+php artisan storage:link      <span class="c"># rend visibles les images de produits (dossier public/storage)</span>
+php artisan serve             <span class="c"># puis ouvrir http://127.0.0.1:8000</span></code></pre>
+    <ul>
+        <li><strong>Base de données</strong> : SQLite par défaut (un simple fichier, rien à installer). Pour MySQL, créer une base
+            <code>lara_shop</code> puis remplacer <code>DB_CONNECTION=sqlite</code> dans <code class="file">.env</code> par les lignes MySQL
+            commentées de <code class="file">.env.example</code>.</li>
+        <li><strong>Revenir aux données de départ</strong> : <code>php artisan migrate:fresh --seed</code> (efface tout et recrée les données de démonstration).</li>
+        <li><strong>Lancer les tests</strong> : <code>php artisan test</code> (64 tests, voir le <a href="reference.html#ch22">chapitre 22</a>).</li>
+        <li><strong>Réglages de la boutique</strong> : <code class="file">config/shop.php</code> (devise <code>DH</code>, nombre d’articles par page,
+            quantité maximale, règles des mots de passe) ; certaines valeurs se changent dans <code class="file">.env</code>
+            (<code>SHOP_CURRENCY</code>, <code>SHOP_PASSWORD_LEAK_CHECK</code>, <code>SHOP_EMAIL_DNS_CHECK</code>).</li>
+    </ul>
+    <div class="callout warn">
+        <strong>Si les images ne s’affichent pas</strong>
+        <p>Les photos sont rangées dans <code>storage/app/public/products</code> et servies à l’adresse <code>/storage/…</code> :
+            sans la commande <code>php artisan storage:link</code>, le lien <code>public/storage</code> n’existe pas. Le formulaire produit de
+            l’administration affiche un avertissement dans ce cas.</p>
+    </div>
+
+    <!-- ================================================================ -->
+    <h2 id="ch3">3. Se repérer dans les dossiers</h2>
+    <p>Laravel impose une organisation : chaque type de fichier a sa place. Voici les dossiers utiles du projet (les dossiers
+        techniques comme <code>vendor/</code> ou <code>bootstrap/cache/</code> sont omis).</p>
+    <pre class="tree">laravelers/
+├── <b>routes/web.php</b>                  <span class="note">← toutes les adresses (URL) du site</span>
+├── <b>app/</b>
+│   ├── Http/
+│   │   ├── Controllers/            <span class="note">← un contrôleur par écran ou groupe d’actions</span>
+│   │   │   ├── CatalogController.php, CartController.php, CheckoutController.php …
+│   │   │   ├── Auth/               <span class="note">  inscription, connexion</span>
+│   │   │   └── Admin/              <span class="note">  tableau de bord, CRUD, commandes, exports</span>
+│   │   ├── Middleware/             <span class="note">← « admin » et « customer » : qui a le droit d’entrer</span>
+│   │   └── Requests/               <span class="note">← règles de validation des formulaires client et produit</span>
+│   ├── Models/                     <span class="note">← Client, Order, OrderLine, Product, Supplier, User</span>
+│   │   └── Concerns/               <span class="note">  codes Cli-000001… et archivage, partagés par plusieurs modèles</span>
+│   ├── Policies/OrderPolicy.php    <span class="note">← qui peut voir / annuler une commande</span>
+│   ├── Services/                   <span class="note">← Cart (panier), OrderService (commande), PriceCalculator (montants)</span>
+│   ├── Support/                    <span class="note">← exports CSV, Excel, PDF</span>
+│   ├── Providers/AppServiceProvider.php
+│   └── helpers.php                 <span class="note">← money() et fr_date() pour l’affichage</span>
+├── <b>database/</b>
+│   ├── migrations/                 <span class="note">← création des tables, dans l’ordre</span>
+│   ├── seeders/ (+ images/)        <span class="note">← données de démonstration et photos des produits</span>
+│   └── factories/                  <span class="note">← fausses données pour les tests</span>
+├── <b>resources/views/</b>                <span class="note">← gabarits Blade (HTML)</span>
+│   ├── layouts/app.blade.php, admin.blade.php
+│   ├── components/                 <span class="note">← &lt;x-input&gt;, &lt;x-add-to-cart&gt;, &lt;x-product-image&gt; …</span>
+│   ├── partials/                   <span class="note">← messages, pagination, totaux</span>
+│   ├── catalog/, cart/, checkout/, orders/, favorites/, my-data/, profile/, auth/
+│   ├── admin/                      <span class="note">← écrans d’administration</span>
+│   ├── pdf/                        <span class="note">← gabarits des documents PDF</span>
+│   └── errors/                     <span class="note">← pages 403, 404, 419, 429, 500 en français</span>
+├── <b>public/</b>
+│   ├── css/app.css                 <span class="note">← tout le style (CSS simple, sans outil de compilation)</span>
+│   ├── js/app.js                   <span class="note">← un peu de JavaScript, facultatif</span>
+│   ├── fonts/, images/
+│   └── index.php                   <span class="note">← point d’entrée de toutes les requêtes</span>
+├── config/shop.php                 <span class="note">← réglages propres à la boutique</span>
+├── lang/fr/validation.php          <span class="note">← messages d’erreur en français</span>
+├── tests/                          <span class="note">← tests automatisés (Feature et Unit)</span>
+└── docs/                           <span class="note">← ce guide</span></pre>
+
+    <!-- ================================================================ -->
+    <h2 id="ch4">4. Le modèle de données</h2>
+    <p>Le sujet décrit cinq entités. Chacune devient une <strong>table</strong> (créée par une migration) et un <strong>modèle</strong>
+        Eloquent (une classe PHP qui lit et écrit cette table).</p>
+
+    <div class="table-wrap"><table>
+        <thead><tr><th>Entité du PDF</th><th>Table · Modèle</th><th>Colonnes (nom du PDF → nom dans le code)</th><th>Migration</th></tr></thead>
+        <tbody>
+        <tr><td>Client</td><td><code>clients</code> · <code class="file">app/Models/Client.php</code></td>
+            <td>Code Client → <code>code</code> (Cli-000001) · Nom → <code>name</code> · Rue → <code>street</code> · Code postal → <code>postal_code</code> (texte, garde les zéros) · Ville → <code>city</code> · Type → <code>type</code> (PU, PA, LI, AS, DI) · Remise spéciale → <code>special_discount</code> (0 à 100)</td>
+            <td><code class="file">database/migrations/2026_11_23_000001_create_clients_table.php</code></td></tr>
+        <tr><td>Commande</td><td><code>orders</code> · <code class="file">app/Models/Order.php</code></td>
+            <td>Numéro → <code>number</code> (Com-000001) · Date → <code>order_date</code> · Condition → <code>payment_terms</code> (LIV, T30) · Code Client → <code>client_id</code></td>
+            <td><code class="file">database/migrations/2026_11_23_000004_create_orders_table.php</code></td></tr>
+        <tr><td>Fournisseur</td><td><code>suppliers</code> · <code class="file">app/Models/Supplier.php</code></td>
+            <td>Code → <code>code</code> (Fr-000001) · Nom → <code>name</code> · Ville → <code>city</code></td>
+            <td><code class="file">database/migrations/2026_11_23_000002_create_suppliers_table.php</code></td></tr>
+        <tr><td>Produit</td><td><code>products</code> · <code class="file">app/Models/Product.php</code></td>
+            <td>Code → <code>code</code> (Pr-000001) · Désignation → <code>designation</code> · Prix unitaire → <code>unit_price</code> · Famille → <code>family</code> (PA, BU, FO, LI) · Code Fournisseur → <code>supplier_id</code></td>
+            <td><code class="file">database/migrations/2026_11_23_000003_create_products_table.php</code></td></tr>
+        <tr><td>Ligne Commande</td><td><code>order_lines</code> · <code class="file">app/Models/OrderLine.php</code></td>
+            <td>Numéro Commande → <code>order_id</code> · Code Produit → <code>product_id</code> · Quantité → <code>quantity</code></td>
+            <td><code class="file">database/migrations/2026_11_23_000005_create_order_lines_table.php</code></td></tr>
+        </tbody>
+    </table></div>
+
+    <div class="er"><!--ER--><svg viewBox="0 0 830 785" role="img" aria-labelledby="er-title er-desc" xmlns="http://www.w3.org/2000/svg"><title id="er-title">Schéma de la base de données Lara-Shop</title><desc id="er-desc">Sept tables : clients, orders, order_lines, products, suppliers, plus users et favorites. Un client a plusieurs commandes ; une commande a plusieurs lignes ; un produit apparaît dans plusieurs lignes ; un fournisseur fournit plusieurs produits ; un compte utilisateur est lié à au plus un client ; favorites relie les comptes et les produits (plusieurs à plusieurs).</desc><g><rect x="20" y="20" width="240" height="166" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="20" y="20" width="240" height="32" rx="8" fill="#14213d"/><rect x="20" y="44" width="240" height="8" fill="#14213d"/><text x="30" y="41" fill="#fff" font-size="14" font-weight="700">users</text><text x="250" y="41" fill="#c8d1e6" font-size="10.5" text-anchor="end">Compte de connexion</text><text x="30" y="67" font-size="12" fill="#14213d" font-weight="700">id</text><text x="250" y="67" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="30" y="88" font-size="12" fill="#14213d" font-weight="400">name</text><text x="30" y="109" font-size="12" fill="#14213d" font-weight="400">email</text><text x="250" y="109" font-size="10.5" fill="#5e6880" text-anchor="end">unique</text><text x="30" y="130" font-size="12" fill="#14213d" font-weight="400">password</text><text x="250" y="130" font-size="10.5" fill="#5e6880" text-anchor="end">haché</text><text x="30" y="151" font-size="12" fill="#14213d" font-weight="400">role</text><text x="250" y="151" font-size="10.5" fill="#5e6880" text-anchor="end">admin | customer</text><text x="30" y="172" font-size="12" fill="#1f4fd1" font-weight="700">client_id</text><text x="250" y="172" font-size="10.5" fill="#5e6880" text-anchor="end">FK → clients, unique</text></g><g><rect x="295" y="20" width="240" height="229" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="295" y="20" width="240" height="32" rx="8" fill="#14213d"/><rect x="295" y="44" width="240" height="8" fill="#14213d"/><text x="305" y="41" fill="#fff" font-size="14" font-weight="700">clients</text><text x="525" y="41" fill="#c8d1e6" font-size="10.5" text-anchor="end">PDF : Client</text><text x="305" y="67" font-size="12" fill="#14213d" font-weight="700">id</text><text x="525" y="67" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="305" y="88" font-size="12" fill="#14213d" font-weight="400">code</text><text x="525" y="88" font-size="10.5" fill="#5e6880" text-anchor="end">unique · Cli-000001</text><text x="305" y="109" font-size="12" fill="#14213d" font-weight="400">name</text><text x="305" y="130" font-size="12" fill="#14213d" font-weight="400">street</text><text x="305" y="151" font-size="12" fill="#14213d" font-weight="400">postal_code</text><text x="525" y="151" font-size="10.5" fill="#5e6880" text-anchor="end">texte</text><text x="305" y="172" font-size="12" fill="#14213d" font-weight="400">city</text><text x="305" y="193" font-size="12" fill="#14213d" font-weight="400">type</text><text x="525" y="193" font-size="10.5" fill="#5e6880" text-anchor="end">PU|PA|LI|AS|DI</text><text x="305" y="214" font-size="12" fill="#14213d" font-weight="400">special_discount</text><text x="525" y="214" font-size="10.5" fill="#5e6880" text-anchor="end">0 à 100 %</text><text x="305" y="235" font-size="12" fill="#14213d" font-weight="400">archived_at</text><text x="525" y="235" font-size="10.5" fill="#5e6880" text-anchor="end">archivage</text></g><g><rect x="570" y="20" width="240" height="250" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="570" y="20" width="240" height="32" rx="8" fill="#14213d"/><rect x="570" y="44" width="240" height="8" fill="#14213d"/><text x="580" y="41" fill="#fff" font-size="14" font-weight="700">orders</text><text x="800" y="41" fill="#c8d1e6" font-size="10.5" text-anchor="end">PDF : Commande</text><text x="580" y="67" font-size="12" fill="#14213d" font-weight="700">id</text><text x="800" y="67" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="580" y="88" font-size="12" fill="#14213d" font-weight="400">number</text><text x="800" y="88" font-size="10.5" fill="#5e6880" text-anchor="end">unique · Com-000001</text><text x="580" y="109" font-size="12" fill="#14213d" font-weight="400">order_date</text><text x="580" y="130" font-size="12" fill="#14213d" font-weight="400">payment_terms</text><text x="800" y="130" font-size="10.5" fill="#5e6880" text-anchor="end">LIV | T30</text><text x="580" y="151" font-size="12" fill="#1f4fd1" font-weight="700">client_id</text><text x="800" y="151" font-size="10.5" fill="#5e6880" text-anchor="end">FK → clients</text><text x="580" y="172" font-size="12" fill="#14213d" font-weight="400">status</text><text x="800" y="172" font-size="10.5" fill="#5e6880" text-anchor="end">pending … cancelled</text><text x="580" y="193" font-size="12" fill="#14213d" font-weight="400">discount_rate</text><text x="800" y="193" font-size="10.5" fill="#5e6880" text-anchor="end">% figé</text><text x="580" y="214" font-size="12" fill="#14213d" font-weight="400">subtotal · discount_amount · total</text><text x="580" y="235" font-size="12" fill="#14213d" font-weight="400">checkout_token</text><text x="800" y="235" font-size="10.5" fill="#5e6880" text-anchor="end">unique</text><text x="580" y="256" font-size="12" fill="#14213d" font-weight="400">stock_restored_at</text></g><g><rect x="20" y="330" width="240" height="124" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="20" y="330" width="240" height="32" rx="8" fill="#14213d"/><rect x="20" y="354" width="240" height="8" fill="#14213d"/><text x="30" y="351" fill="#fff" font-size="14" font-weight="700">favorites</text><text x="250" y="351" fill="#c8d1e6" font-size="10.5" text-anchor="end">Favoris (N–N)</text><text x="30" y="377" font-size="12" fill="#14213d" font-weight="700">id</text><text x="250" y="377" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="30" y="398" font-size="12" fill="#1f4fd1" font-weight="700">user_id</text><text x="250" y="398" font-size="10.5" fill="#5e6880" text-anchor="end">FK → users</text><text x="30" y="419" font-size="12" fill="#1f4fd1" font-weight="700">product_id</text><text x="250" y="419" font-size="10.5" fill="#5e6880" text-anchor="end">FK → products</text><text x="30" y="440" font-size="12" fill="#14213d" font-weight="700">(user_id, product_id)</text><text x="250" y="440" font-size="10.5" fill="#5e6880" text-anchor="end">unique</text></g><g><rect x="295" y="330" width="240" height="250" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="295" y="330" width="240" height="32" rx="8" fill="#14213d"/><rect x="295" y="354" width="240" height="8" fill="#14213d"/><text x="305" y="351" fill="#fff" font-size="14" font-weight="700">products</text><text x="525" y="351" fill="#c8d1e6" font-size="10.5" text-anchor="end">PDF : Produit</text><text x="305" y="377" font-size="12" fill="#14213d" font-weight="700">id</text><text x="525" y="377" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="305" y="398" font-size="12" fill="#14213d" font-weight="400">code</text><text x="525" y="398" font-size="10.5" fill="#5e6880" text-anchor="end">unique · Pr-000001</text><text x="305" y="419" font-size="12" fill="#14213d" font-weight="400">designation</text><text x="305" y="440" font-size="12" fill="#14213d" font-weight="400">unit_price</text><text x="525" y="440" font-size="10.5" fill="#5e6880" text-anchor="end">DECIMAL(10,2)</text><text x="305" y="461" font-size="12" fill="#14213d" font-weight="400">family</text><text x="525" y="461" font-size="10.5" fill="#5e6880" text-anchor="end">PA|BU|FO|LI</text><text x="305" y="482" font-size="12" fill="#1f4fd1" font-weight="700">supplier_id</text><text x="525" y="482" font-size="10.5" fill="#5e6880" text-anchor="end">FK → suppliers</text><text x="305" y="503" font-size="12" fill="#14213d" font-weight="400">stock · low_stock_threshold</text><text x="305" y="524" font-size="12" fill="#14213d" font-weight="400">image_path</text><text x="305" y="545" font-size="12" fill="#14213d" font-weight="400">is_listed</text><text x="525" y="545" font-size="10.5" fill="#5e6880" text-anchor="end">visible en boutique</text><text x="305" y="566" font-size="12" fill="#14213d" font-weight="400">archived_at</text><text x="525" y="566" font-size="10.5" fill="#5e6880" text-anchor="end">archivage</text></g><g><rect x="570" y="330" width="240" height="187" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="570" y="330" width="240" height="32" rx="8" fill="#14213d"/><rect x="570" y="354" width="240" height="8" fill="#14213d"/><text x="580" y="351" fill="#fff" font-size="14" font-weight="700">order_lines</text><text x="800" y="351" fill="#c8d1e6" font-size="10.5" text-anchor="end">PDF : Ligne Commande</text><text x="580" y="377" font-size="12" fill="#14213d" font-weight="700">id</text><text x="800" y="377" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="580" y="398" font-size="12" fill="#1f4fd1" font-weight="700">order_id</text><text x="800" y="398" font-size="10.5" fill="#5e6880" text-anchor="end">FK → orders</text><text x="580" y="419" font-size="12" fill="#1f4fd1" font-weight="700">product_id</text><text x="800" y="419" font-size="10.5" fill="#5e6880" text-anchor="end">FK → products</text><text x="580" y="440" font-size="12" fill="#14213d" font-weight="400">quantity</text><text x="800" y="440" font-size="10.5" fill="#5e6880" text-anchor="end">&gt; 0</text><text x="580" y="461" font-size="12" fill="#14213d" font-weight="400">unit_price</text><text x="800" y="461" font-size="10.5" fill="#5e6880" text-anchor="end">prix figé</text><text x="580" y="482" font-size="12" fill="#14213d" font-weight="400">line_total</text><text x="580" y="503" font-size="12" fill="#14213d" font-weight="700">(order_id, product_id)</text><text x="800" y="503" font-size="10.5" fill="#5e6880" text-anchor="end">unique</text></g><g><rect x="295" y="620" width="240" height="145" rx="8" fill="#fff" stroke="#cdc7b9"/><rect x="295" y="620" width="240" height="32" rx="8" fill="#14213d"/><rect x="295" y="644" width="240" height="8" fill="#14213d"/><text x="305" y="641" fill="#fff" font-size="14" font-weight="700">suppliers</text><text x="525" y="641" fill="#c8d1e6" font-size="10.5" text-anchor="end">PDF : Fournisseur</text><text x="305" y="667" font-size="12" fill="#14213d" font-weight="700">id</text><text x="525" y="667" font-size="10.5" fill="#5e6880" text-anchor="end">PK</text><text x="305" y="688" font-size="12" fill="#14213d" font-weight="400">code</text><text x="525" y="688" font-size="10.5" fill="#5e6880" text-anchor="end">unique · Fr-000001</text><text x="305" y="709" font-size="12" fill="#14213d" font-weight="400">name</text><text x="305" y="730" font-size="12" fill="#14213d" font-weight="400">city</text><text x="305" y="751" font-size="12" fill="#14213d" font-weight="400">archived_at</text><text x="525" y="751" font-size="10.5" fill="#5e6880" text-anchor="end">archivage</text></g><line x1="260" y1="169.5" x2="295" y2="169.5" stroke="#1f4fd1" stroke-width="1.6"/><text x="263" y="164.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="start">0..1</text><text x="292" y="184.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="end">1</text><line x1="535" y1="148.5" x2="570" y2="148.5" stroke="#1f4fd1" stroke-width="1.6"/><text x="538" y="143.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="start">1</text><text x="567" y="163.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="end">N</text><line x1="690" y1="270" x2="690" y2="330" stroke="#1f4fd1" stroke-width="1.6"/><text x="696" y="280.8" font-size="12" font-weight="700" fill="#1f4fd1">1</text><text x="696" y="315.0" font-size="12" font-weight="700" fill="#1f4fd1">N</text><line x1="535" y1="416.5" x2="570" y2="416.5" stroke="#1f4fd1" stroke-width="1.6"/><text x="538" y="411.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="start">1</text><text x="567" y="431.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="end">N</text><line x1="415" y1="620" x2="415" y2="580" stroke="#1f4fd1" stroke-width="1.6"/><text x="421" y="612.8" font-size="12" font-weight="700" fill="#1f4fd1">1</text><text x="421" y="590.0" font-size="12" font-weight="700" fill="#1f4fd1">N</text><line x1="140" y1="186" x2="140" y2="330" stroke="#1f4fd1" stroke-width="1.6"/><text x="146" y="211.92" font-size="12" font-weight="700" fill="#1f4fd1">1</text><text x="146" y="294.0" font-size="12" font-weight="700" fill="#1f4fd1">N</text><line x1="295" y1="416.5" x2="260" y2="416.5" stroke="#1f4fd1" stroke-width="1.6"/><text x="292" y="411.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="end">1</text><text x="263" y="431.5" font-size="12" font-weight="700" fill="#1f4fd1" text-anchor="start">N</text></svg><!--/ER--></div>
+    <p class="muted"><small>Lecture du schéma : « 1 » et « N » indiquent combien de lignes peuvent se correspondre. FK (clé étrangère) en bleu.</small></p>
+
+    <h3 id="cles">Clés primaires, clés étrangères et codes métier</h3>
+    <ul>
+        <li><strong>Clé primaire</strong> : chaque table a une colonne <code>id</code> (un entier attribué par la base). C’est elle que les
+            autres tables utilisent pour se relier.</li>
+        <li><strong>Clé étrangère</strong> : une colonne qui contient l’<code>id</code> d’une ligne d’une autre table, par exemple
+            <code>orders.client_id</code>. La base refuse une valeur qui ne correspond à aucun client.</li>
+        <li><strong>Code métier</strong> : le PDF identifie les lignes par des codes lisibles (<code>Cli-000001</code>). Ils sont stockés dans une
+            colonne <code>code</code> (ou <code>number</code> pour les commandes) protégée par un index <em>unique</em>, et fabriqués par le serveur
+            juste après l’insertion, à partir de l’<code>id</code>, par le trait <code class="file">app/Models/Concerns/HasBusinessCode.php</code>.</li>
+    </ul>
+    <figure class="code" data-file="app/Models/Concerns/HasBusinessCode.php">
+        <figcaption><span>app/Models/Concerns/HasBusinessCode.php</span><span>PHP</span></figcaption>
+        <pre><code>static::created(function ($model) {
+    $column = $model-&gt;codeColumn ?? 'code';
+
+    if (empty($model-&gt;{$column})) {
+        $model-&gt;{$column} = $model-&gt;codePrefix.'-'.str_pad((string) $model-&gt;id, 6, '0', STR_PAD_LEFT);
+        $model-&gt;saveQuietly(); // save without firing events again
+    }
+});</code></pre>
+    </figure>
+    <p>Un modèle n’a qu’à déclarer son préfixe, par exemple <code>protected string $codePrefix = 'Cli';</code> dans
+        <code class="file">app/Models/Client.php</code>.</p>
+
+    <h3 id="paire-unique">La paire unique commande / produit</h3>
+    <p>Dans le PDF, la clé de Ligne Commande est le couple (Numéro Commande, Code Produit) : un produit ne peut apparaître qu’une fois
+        dans une commande. Le projet garde un <code>id</code> pratique pour Laravel <em>et</em> impose cette règle par un index unique :</p>
+    <figure class="code" data-file="database/migrations/2026_11_23_000005_create_order_lines_table.php">
+        <figcaption><span>database/migrations/2026_11_23_000005_create_order_lines_table.php</span><span>PHP</span></figcaption>
+        <pre><code>Schema::create('order_lines', function (Blueprint $table) {
+    $table-&gt;id();
+    $table-&gt;foreignId('order_id')-&gt;constrained()-&gt;cascadeOnDelete();
+    $table-&gt;foreignId('product_id')-&gt;constrained()-&gt;restrictOnDelete();
+    $table-&gt;unsignedInteger('quantity');                 // Quantité (&gt; 0, validated)
+    $table-&gt;decimal('unit_price', 10, 2);                 // price frozen at confirmation
+    $table-&gt;decimal('line_total', 10, 2);
+    $table-&gt;timestamps();
+
+    $table-&gt;unique(['order_id', 'product_id']);
+});</code></pre>
+    </figure>
+    <p>Un test le vérifie : <code class="file">tests/Feature/AdminCrudTest.php</code> (méthode <code>test_order_line_pair_is_unique_in_database</code>)
+        essaie d’ajouter deux fois le même produit à une commande et attend une erreur de la base.</p>
+
+    <h3 id="relations">Relations un-à-plusieurs et plusieurs-à-plusieurs</h3>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Règle du PDF</th><th>Relation</th><th>Dans les modèles</th></tr></thead>
+        <tbody>
+        <tr><td>1–2 : un client passe une ou plusieurs commandes ; une commande a un seul client</td><td>un-à-plusieurs</td><td><code>Client::orders()</code> (hasMany) · <code>Order::client()</code> (belongsTo)</td></tr>
+        <tr><td>3–4 : une commande contient plusieurs produits ; un produit est dans plusieurs commandes</td><td>plusieurs-à-plusieurs, via <code>order_lines</code></td><td><code>Order::lines()</code> · <code>OrderLine::product()</code> · <code>Product::orderLines()</code></td></tr>
+        <tr><td>6–7 : un produit a un seul fournisseur ; un fournisseur fournit plusieurs produits</td><td>un-à-plusieurs</td><td><code>Product::supplier()</code> · <code>Supplier::products()</code></td></tr>
+        <tr><td>(ajout) un compte de connexion appartient à un client</td><td>un-à-un</td><td><code>User::client()</code> · <code>Client::user()</code></td></tr>
+        <tr><td>(ajout) un client garde des produits en favoris</td><td>plusieurs-à-plusieurs, table pivot <code>favorites</code></td><td><code>User::favoriteProducts()</code> (belongsToMany)</td></tr>
+        </tbody>
+    </table></div>
+    <figure class="code" data-file="app/Models/Product.php">
+        <figcaption><span>app/Models/Product.php</span><span>PHP</span></figcaption>
+        <pre><code>/** Rule 6: a product is supplied by exactly one supplier. */
+public function supplier(): BelongsTo
+{
+    return $this-&gt;belongsTo(Supplier::class);
+}
+
+/** Rule 4: a product can appear in many orders (through order lines). */
+public function orderLines(): HasMany
+{
+    return $this-&gt;hasMany(OrderLine::class);
+}</code></pre>
+    </figure>
+    <p>Grâce à ces méthodes, on écrit <code>$product-&gt;supplier-&gt;name</code> ou <code>$order-&gt;lines</code> sans requête SQL : Eloquent la
+        construit seul. La règle 5 (« le prix unitaire n’est pas négociable ») se traduit par un prix lu uniquement en base, jamais dans le
+        formulaire (voir le <a href="boutique.html#ch10">panier</a>).</p>
+
+    <h3 id="ajouts">Tables et colonnes ajoutées au sujet</h3>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Ajout</th><th>Pourquoi</th></tr></thead>
+        <tbody>
+        <tr><td>Table <code>users</code> (+ <code>role</code>, <code>client_id</code>)</td><td>Se connecter avec un e-mail et un mot de passe. Un client du PDF peut exister sans compte (commande saisie par l’admin). Migration <code class="file">database/migrations/2026_11_23_000006_add_role_and_client_to_users_table.php</code>.</td></tr>
+        <tr><td>Table <code>favorites</code></td><td>Liste de favoris (<a href="boutique.html#ch9">chapitre 9</a>).</td></tr>
+        <tr><td><code>orders.status</code></td><td>Suivi de la livraison (En attente, En préparation, Expédiée, Livrée, Annulée), distinct de la condition de paiement.</td></tr>
+        <tr><td><code>orders.discount_rate</code>, <code>subtotal</code>, <code>discount_amount</code>, <code>total</code> et <code>order_lines.unit_price</code>, <code>line_total</code></td><td>Montants <strong>figés</strong> au moment de la commande : si le prix du catalogue ou la remise du client changent ensuite, l’historique reste juste.</td></tr>
+        <tr><td><code>orders.checkout_token</code> (unique)</td><td>Empêche qu’un double clic crée deux commandes (<a href="boutique.html#double-envoi">explication</a>).</td></tr>
+        <tr><td><code>orders.stock_restored_at</code></td><td>Garantit que l’annulation remet le stock une seule fois.</td></tr>
+        <tr><td><code>products.stock</code>, <code>low_stock_threshold</code></td><td>Gestion du stock et alerte « stock faible ».</td></tr>
+        <tr><td><code>products.image_path</code>, <code>products.is_listed</code></td><td>Photo du produit ; case « Visible dans la boutique » (migration <code class="file">database/migrations/2026_11_24_000001_add_is_listed_to_products_table.php</code>).</td></tr>
+        <tr><td><code>archived_at</code> (clients, fournisseurs, produits)</td><td>Archiver au lieu de supprimer une ligne utilisée par l’historique (<a href="admin.html#archivage">archivage</a>).</td></tr>
+        <tr><td>Tables <code>sessions</code>, <code>cache</code>, <code>jobs</code>, <code>password_reset_tokens</code></td><td>Créées par les migrations fournies avec Laravel (<code>0001_01_01_…</code>). La table <code>sessions</code> stocke les sessions, donc le panier.</td></tr>
+        </tbody>
+    </table></div>
+
+    <h3 id="seeders">Les données de démonstration</h3>
+    <p><code class="file">database/seeders/DatabaseSeeder.php</code> appelle quatre seeders dans l’ordre imposé par les clés étrangères :</p>
+    <figure class="code" data-file="database/seeders/DatabaseSeeder.php">
+        <figcaption><span>database/seeders/DatabaseSeeder.php</span><span>PHP</span></figcaption>
+        <pre><code>$this-&gt;call([
+    SupplierSeeder::class,
+    ProductSeeder::class,
+    ClientSeeder::class,
+    OrderSeeder::class,
+]);</code></pre>
+    </figure>
+    <p>Résultat : 6 fournisseurs, 30 produits (dont certains en stock faible ou en rupture, pour la démonstration), 8 clients et 17 commandes
+        dans tous les statuts. <code class="file">database/seeders/ProductSeeder.php</code> copie aussi les photos de
+        <code>database/seeders/images/</code> vers le stockage public.</p>
+
+    <!-- ================================================================ -->
+    <h2 id="ch5">5. Le parcours d’une requête</h2>
+    <p>Suivons ce qui se passe quand un visiteur ouvre la fiche du stylo bille : <code>GET /produits/Pr-000017</code>.</p>
+    <ol class="lifecycle">
+        <li><strong>1. Navigateur</strong>Il envoie la requête HTTP <code>GET /produits/Pr-000017</code>.</li>
+        <li><strong>2. public/index.php</strong>Toutes les requêtes entrent ici ; Laravel démarre (<code>bootstrap/app.php</code>).</li>
+        <li><strong>3. Middlewares</strong>Le groupe « web » ouvre la session, vérifie le jeton CSRF des formulaires…</li>
+        <li><strong>4. Route</strong><code>routes/web.php</code> trouve la route <code>catalog.show</code>.</li>
+        <li><strong>5. Modèle</strong>La liaison de modèle cherche le produit dont <code>code</code> vaut <code>Pr-000017</code>.</li>
+        <li><strong>6. Contrôleur</strong><code>CatalogController@show</code> prépare les données.</li>
+        <li><strong>7. Vue Blade</strong><code>catalog/show.blade.php</code> produit le HTML.</li>
+        <li><strong>8. Réponse</strong>Le navigateur reçoit la page (code 200).</li>
+    </ol>
+
+    <h4>Étape 4 : la route</h4>
+    <figure class="code" data-file="routes/web.php">
+        <figcaption><span>routes/web.php</span><span>PHP</span></figcaption>
+        <pre><code>Route::get('/produits/{product:code}', [CatalogController::class, 'show'])-&gt;name('catalog.show');</code></pre>
+    </figure>
+    <p><code>{product:code}</code> est un <strong>paramètre de route</strong>. Le <code>:code</code> demande à Laravel de chercher le modèle
+        <code>Product</code> par sa colonne <code>code</code> (au lieu de l’<code>id</code>) : c’est la <strong>liaison de modèle</strong>
+        (<em>route model binding</em>). Si aucun produit n’a ce code, Laravel répond 404 tout seul. Le nom <code class="route">catalog.show</code>
+        permet d’écrire les liens sans taper l’adresse : <code>route('catalog.show', $product)</code>.</p>
+
+    <h4>Étape 6 : le contrôleur</h4>
+    <figure class="code" data-file="app/Http/Controllers/CatalogController.php">
+        <figcaption><span>app/Http/Controllers/CatalogController.php</span><span>PHP</span></figcaption>
+        <pre><code>public function show(Request $request, Product $product)
+{
+    // Hidden or archived products: 404 for customers. Admins may preview them.
+    abort_unless($product-&gt;isPurchasable() || $request-&gt;user()?-&gt;isAdmin(), 404);
+
+    $product-&gt;load('supplier');
+    $isFavorite = $request-&gt;user()?-&gt;favoriteProducts()-&gt;whereKey($product-&gt;id)-&gt;exists() ?? false;
+
+    $related = Product::available()
+        -&gt;where('family', $product-&gt;family)
+        -&gt;whereKeyNot($product-&gt;id)
+        -&gt;inRandomOrder()-&gt;limit(4)-&gt;get();
+
+    return view('catalog.show', compact('product', 'isFavorite', 'related'));
+}</code></pre>
+    </figure>
+    <p>Le contrôleur reçoit déjà l’objet <code>$product</code> (étape 5). Il vérifie que le produit peut être montré, charge son fournisseur,
+        regarde s’il est dans les favoris, choisit quatre produits de la même famille et transmet le tout à la vue.</p>
+
+    <h4>Étape 7 : la vue et le gabarit</h4>
+    <p><code class="file">resources/views/catalog/show.blade.php</code> commence par <code>@extends('layouts.app')</code> : elle hérite
+        du gabarit commun <code class="file">resources/views/layouts/app.blade.php</code> (en-tête, recherche, pied de page) et remplit
+        seulement sa section <code>@section('content')</code>. Le nombre d’articles du panier affiché dans l’en-tête est ajouté à toutes les
+        pages par un <em>view composer</em> :</p>
+    <figure class="code" data-file="app/Providers/AppServiceProvider.php">
+        <figcaption><span>app/Providers/AppServiceProvider.php</span><span>PHP</span></figcaption>
+        <pre><code>View::composer('layouts.app', function ($view) {
+    $view-&gt;with('cartCount', app(Cart::class)-&gt;count());
+});</code></pre>
+    </figure>
+
+    <h4>Variante : un formulaire qui modifie des données, puis une redirection</h4>
+    <p>Le bouton « Ajouter au panier » envoie <code>POST /panier</code>. Le trajet est le même, avec deux différences :
+        le middleware vérifie le jeton <strong>CSRF</strong> caché dans le formulaire par <code>@csrf</code> (sinon : erreur 419), et le
+        contrôleur ne renvoie pas une vue mais une <strong>redirection</strong> vers la page précédente, avec un message gardé une seule fois
+        dans la session (<em>flash</em>). Le navigateur suit la redirection (code 302) et affiche la page avec le message.
+        Ce schéma « POST → traitement → redirection → GET » évite de renvoyer le formulaire en actualisant la page. Détails au
+        <a href="boutique.html#ch10">chapitre 10</a>.</p>
+
+    <div class="callout try">
+        <strong>À essayer</strong>
+        <p>Ouvrez <code>http://127.0.0.1:8000/produits/Pr-999999</code> : aucun produit n’a ce code, la liaison de modèle répond par la page
+            404 en français (<code class="file">resources/views/errors/404.blade.php</code>). Lancez ensuite
+            <code>php artisan route:list</code> : toutes les routes s’affichent avec leur méthode, leur nom et leur contrôleur.</p>
+    </div>
+
+    <nav class="chapter-nav" aria-label="Pages du guide">
+        <span></span>
+        <a href="boutique.html">Partie 2 : la boutique →</a>
+    </nav>
+    <footer class="doc-footer">Guide écrit à partir du code de ce dossier (Laravel 12.73, PHP 8.2). Les extraits sont copiés depuis les fichiers indiqués.</footer>
+</main>
+</div>
+</body>
+</html>

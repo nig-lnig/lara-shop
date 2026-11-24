@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Guide Lara-Shop · Références</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#contenu">Aller au contenu</a>
+<div class="layout">
+<!--NAV:reference-->
+<nav class="toc" aria-label="Sommaire du guide">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">L</span> Guide Lara-Shop</a>
+<details open><summary>Sommaire</summary>
+<h2>Partie 1 · Prise en main</h2><ol>
+<li><a href="index.html#ch1"><span class="num">1.</span>Ce que fait l’application</a></li>
+<li><a href="index.html#ch2"><span class="num">2.</span>Lancer le projet</a></li>
+<li><a href="index.html#ch3"><span class="num">3.</span>Se repérer dans les dossiers</a></li>
+<li><a href="index.html#ch4"><span class="num">4.</span>Le modèle de données</a></li>
+<li><a href="index.html#ch5"><span class="num">5.</span>Le parcours d’une requête</a></li>
+</ol>
+<h2>Partie 2 · La boutique</h2><ol>
+<li><a href="boutique.html#ch6"><span class="num">6.</span>Inscription, connexion, profil</a></li>
+<li><a href="boutique.html#ch7"><span class="num">7.</span>Catalogue et fiche produit</a></li>
+<li><a href="boutique.html#ch8"><span class="num">8.</span>Recherche, filtres, tri</a></li>
+<li><a href="boutique.html#ch9"><span class="num">9.</span>Favoris</a></li>
+<li><a href="boutique.html#ch10"><span class="num">10.</span>Panier</a></li>
+<li><a href="boutique.html#ch11"><span class="num">11.</span>Passer commande</a></li>
+<li><a href="boutique.html#ch12"><span class="num">12.</span>Mes commandes et statuts</a></li>
+<li><a href="boutique.html#ch13"><span class="num">13.</span>Mes données</a></li>
+</ol>
+<h2>Partie 3 · L’administration</h2><ol>
+<li><a href="admin.html#ch14"><span class="num">14.</span>Tableau de bord</a></li>
+<li><a href="admin.html#ch15"><span class="num">15.</span>Clients (CRUD)</a></li>
+<li><a href="admin.html#ch16"><span class="num">16.</span>Fournisseurs (CRUD)</a></li>
+<li><a href="admin.html#ch17"><span class="num">17.</span>Produits, images, stock</a></li>
+<li><a href="admin.html#ch18"><span class="num">18.</span>Commandes (admin)</a></li>
+<li><a href="admin.html#ch19"><span class="num">19.</span>Exports CSV, Excel, PDF</a></li>
+</ol>
+<h2>Partie 4 · Références</h2><ol>
+<li><a href="#ch20"><span class="num">20.</span>Notions Laravel</a></li>
+<li><a href="#ch21"><span class="num">21.</span>Interface et JavaScript</a></li>
+<li><a href="#ch22"><span class="num">22.</span>Tests automatisés</a></li>
+<li><a href="#ch23"><span class="num">23.</span>Écarts observés</a></li>
+<li><a href="#ch24"><span class="num">24.</span>Glossaire</a></li>
+<li><a href="#ch25"><span class="num">25.</span>Routes et fonctionnalités</a></li>
+</ol>
+</details></nav>
+<!--/NAV-->
+
+<main id="contenu">
+    <p class="eyebrow">Partie 4</p>
+    <h1>Références</h1>
+    <p class="lead">Les notions Laravel avec leur exemple dans le projet, l’interface, les tests, les écarts par rapport au sujet,
+        le glossaire et le tableau complet des routes.</p>
+
+    <!-- ================================================================ -->
+    <h2 id="ch20">20. Les notions Laravel, avec leur exemple dans le projet</h2>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Notion</th><th>En une phrase</th><th>Où la voir dans Lara-Shop</th></tr></thead>
+        <tbody>
+        <tr><td>MVC</td><td>Séparer les données (Modèle), l’affichage (Vue) et la coordination (Contrôleur).</td><td><code class="file">app/Models/Product.php</code> · <code class="file">resources/views/catalog/show.blade.php</code> · <code class="action">CatalogController@show</code> — <a href="index.html#ch5">ch. 5</a></td></tr>
+        <tr><td>Route nommée</td><td>Une adresse a un nom ; on écrit <code>route('cart.index')</code> au lieu de <code>/panier</code>.</td><td><code class="file">routes/web.php</code> — <a href="#ch25">ch. 25</a></td></tr>
+        <tr><td>Méthodes HTTP</td><td>GET lit, POST crée, PUT/PATCH modifient, DELETE supprime.</td><td>Panier : <code class="route">cart.store</code>, <code class="route">cart.update</code>, <code class="route">cart.destroy</code> — <a href="boutique.html#ch10">ch. 10</a></td></tr>
+        <tr><td>Paramètre de route et liaison de modèle</td><td><code>{product}</code> dans l’adresse devient directement un objet <code>Product</code> (404 s’il n’existe pas).</td><td><code>/produits/{product:code}</code>, <code>/mes-commandes/{order:number}</code> — <a href="index.html#ch5">ch. 5</a>, <a href="boutique.html#ch12">ch. 12</a></td></tr>
+        <tr><td>CRUD et ressource</td><td>Les sept actions standard d’un « objet géré », générées par <code>Route::resource()</code>.</td><td>Clients, fournisseurs, produits — <a href="admin.html#ch15">ch. 15</a></td></tr>
+        <tr><td>Gabarit Blade</td><td>Une page « mère » (<code>@yield</code>) que les pages remplissent (<code>@extends</code>, <code>@section</code>).</td><td><code class="file">resources/views/layouts/app.blade.php</code>, <code class="file">resources/views/layouts/admin.blade.php</code> — <a href="#ch21">ch. 21</a></td></tr>
+        <tr><td>Composant Blade</td><td>Morceau de vue réutilisable appelé comme une balise <code>&lt;x-…&gt;</code>, avec des paramètres (<code>@props</code>).</td><td><code class="file">resources/views/components/input.blade.php</code>, <code class="file">resources/views/components/add-to-cart.blade.php</code> — <a href="#ch21">ch. 21</a></td></tr>
+        <tr><td>Relations Eloquent</td><td>Méthodes <code>hasMany</code>, <code>belongsTo</code>, <code>belongsToMany</code> qui relient les modèles.</td><td><a href="index.html#relations">ch. 4</a>, favoris <a href="boutique.html#ch9">ch. 9</a></td></tr>
+        <tr><td>Migration</td><td>Fichier PHP qui crée ou modifie une table ; <code>php artisan migrate</code> les exécute dans l’ordre.</td><td><code>database/migrations/</code> — <a href="index.html#ch4">ch. 4</a></td></tr>
+        <tr><td>Seeder et factory</td><td>Remplir la base avec des données de démonstration (seeders) ou de test (factories).</td><td><code class="file">database/seeders/DatabaseSeeder.php</code>, <code class="file">database/factories/UserFactory.php</code> — <a href="index.html#seeders">ch. 4</a></td></tr>
+        <tr><td>Validation</td><td>Vérifier les données reçues ; en cas d’erreur, Laravel revient au formulaire avec les messages et les valeurs saisies.</td><td><code>$request->validate()</code> dans <code class="action">CheckoutController@store</code> ; Form Requests <code class="file">app/Http/Requests/ProductRequest.php</code> — <a href="boutique.html#ch11">ch. 11</a>, <a href="admin.html#ch15">ch. 15</a></td></tr>
+        <tr><td>Middleware</td><td>Filtre exécuté avant le contrôleur.</td><td><code>auth</code>, <code>guest</code>, <code>throttle</code>, <code>customer</code>, <code>admin</code> — <a href="boutique.html#ch6">ch. 6</a>, <a href="admin.html">partie 3</a></td></tr>
+        <tr><td>Autorisation (policy, gate)</td><td>Décider si un utilisateur peut agir sur un objet précis.</td><td><code class="file">app/Policies/OrderPolicy.php</code>, <code>Gate::authorize()</code>, <code>@can</code> — <a href="boutique.html#ch12">ch. 12</a></td></tr>
+        <tr><td>Session</td><td>Mémoire du serveur pour un navigateur (panier, connexion, messages flash).</td><td><code class="file">app/Services/Cart.php</code> — <a href="boutique.html#ch10">ch. 10</a></td></tr>
+        <tr><td>Protection CSRF</td><td>Jeton secret dans chaque formulaire, pour qu’un autre site ne puisse pas envoyer de formulaire à votre place.</td><td><code>@csrf</code> dans tous les formulaires POST ; page <code class="file">resources/views/errors/419.blade.php</code> — <a href="boutique.html#ch10">ch. 10</a></td></tr>
+        <tr><td>Pagination</td><td>Découper une liste en pages.</td><td><code>paginate(12)->withQueryString()</code>, <code class="file">resources/views/partials/pagination.blade.php</code> — <a href="boutique.html#ch8">ch. 8</a></td></tr>
+        <tr><td>Transaction</td><td>Plusieurs écritures en « tout ou rien ».</td><td><code class="action">OrderService@placeOrder</code>, <code class="action">RegisterController@store</code> — <a href="boutique.html#ch11">ch. 11</a></td></tr>
+        <tr><td>Génération CSV</td><td>Écrire des lignes séparées par <code>;</code> avec <code>fputcsv</code> et les envoyer en téléchargement.</td><td><code class="file">app/Support/CsvExport.php</code> — <a href="admin.html#ch19">ch. 19</a></td></tr>
+        <tr><td>Injection de dépendance</td><td>Laravel crée et passe lui-même les objets demandés en paramètre.</td><td><code>public function store(Request $request, Cart $cart, OrderService $orders)</code> — <a href="boutique.html#ch11">ch. 11</a></td></tr>
+        <tr><td>Configuration et .env</td><td>Les réglages sont lus avec <code>config('shop.per_page')</code> ; les secrets et valeurs locales vivent dans <code>.env</code>.</td><td><code class="file">config/shop.php</code>, <code class="file">.env.example</code> — <a href="index.html#ch2">ch. 2</a></td></tr>
+        </tbody>
+    </table></div>
+
+    <!-- ================================================================ -->
+    <h2 id="ch21">21. L’interface : gabarits, composants et JavaScript</h2>
+    <h3>Gabarits et morceaux partagés</h3>
+    <ul>
+        <li><code class="file">resources/views/layouts/app.blade.php</code> : bandeau supérieur, en-tête (logo, recherche, favoris, compte, panier),
+            barre des familles, messages, contenu, pied de page.</li>
+        <li><code class="file">resources/views/layouts/admin.blade.php</code> : barre latérale de l’administration et zone de contenu.</li>
+        <li><code class="file">resources/views/partials/flash.blade.php</code> : messages de succès et d’erreur ; pour les erreurs de validation,
+            un résumé dont chaque ligne est un lien vers le champ concerné (le message détaillé reste sous le champ).</li>
+        <li><code class="file">resources/views/partials/totals.blade.php</code> : sous-total, remise et total, utilisé par le panier, la commande et le détail des commandes.</li>
+        <li><code class="file">resources/views/partials/account-nav.blade.php</code> : onglets Mes commandes, Mes données, Favoris, Profil.</li>
+        <li><code>resources/views/errors/</code> : pages 403, 404, 419, 429 et 500 en français ; la page 403 affiche le message donné par <code>abort(403, '…')</code>.</li>
+    </ul>
+    <h3>Composants</h3>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Composant</th><th>Rôle</th></tr></thead>
+        <tbody>
+        <tr><td><code>&lt;x-input&gt;</code>, <code>&lt;x-select&gt;</code></td><td>Champ avec son étiquette, la valeur précédente (<code>old()</code>) et son message d’erreur.</td></tr>
+        <tr><td><code>&lt;x-password-field&gt;</code></td><td>Mot de passe avec bouton afficher/masquer et liste des règles cochée en direct.</td></tr>
+        <tr><td><code>&lt;x-add-to-cart&gt;</code></td><td>Formulaire d’ajout au panier, avec ou sans sélecteur de quantité.</td></tr>
+        <tr><td><code>&lt;x-favorite-button&gt;</code></td><td>Cœur (cartes) ou bouton texte (fiche produit).</td></tr>
+        <tr><td><code>&lt;x-product-image&gt;</code></td><td>Image du produit et tuile de famille si elle manque.</td></tr>
+        <tr><td><code>&lt;x-stock-badge&gt;</code>, <code>&lt;x-status-badge&gt;</code></td><td>Badges de stock et de statut de commande.</td></tr>
+        <tr><td><code>&lt;x-export-formats&gt;</code></td><td>Trois boutons CSV · Excel · PDF pour un jeu de données.</td></tr>
+        <tr><td><code>&lt;x-icon&gt;</code></td><td>Petites icônes SVG.</td></tr>
+        </tbody>
+    </table></div>
+    <figure class="code" data-file="resources/views/components/input.blade.php">
+        <figcaption><span>resources/views/components/input.blade.php</span><span>Blade</span></figcaption>
+        <pre><code>@props(['name', 'label', 'type' => 'text', 'value' => null, 'help' => null])</code></pre>
+    </figure>
+
+    <h3>Le JavaScript, toujours facultatif</h3>
+    <p><code class="file">public/js/app.js</code> améliore l’expérience sans être nécessaire : sans lui, chaque formulaire et chaque lien
+        fonctionne normalement. Ses sections : menus (compte, administration), panneau des filtres sur téléphone (focus déplacé dans le panneau,
+        Échap pour fermer), sélecteurs de quantité et envoi automatique, ajout au panier et favoris sans rechargement (avec <code>fetch</code>),
+        aperçu d’image, champs mot de passe, confirmations et bouton de commande désactivé après le premier clic.</p>
+    <figure class="code" data-file="public/js/app.js">
+        <figcaption><span>public/js/app.js</span><span>JavaScript</span></figcaption>
+        <pre><code>async function sendForm(form) {
+    const response = await fetch(form.action, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form), // contains the CSRF token (@csrf)
+    });</code></pre>
+    </figure>
+    <p>Les animations sont courtes et désactivées (ou remplacées par un simple fondu) quand le système demande moins de mouvement
+        (<code>prefers-reduced-motion</code>). Le style se trouve dans un seul fichier, <code class="file">public/css/app.css</code>, organisé en
+        sections numérotées, avec les couleurs en variables CSS (<code>--ink</code>, <code>--cobalt</code>…).</p>
+
+    <!-- ================================================================ -->
+    <h2 id="ch22">22. Les tests automatisés</h2>
+    <p><code>php artisan test</code> lance 64 tests (PHPUnit) sur une base SQLite en mémoire, sans toucher à vos données.</p>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Fichier</th><th>Ce qu’il vérifie</th></tr></thead>
+        <tbody>
+        <tr><td><code class="file">tests/Feature/AuthTest.php</code></td><td>Inscription (client lié, type et remise par défaut, rôle impossible à forcer), e-mails invalides, mots de passe faibles, connexion, profil.</td></tr>
+        <tr><td><code class="file">tests/Feature/CatalogTest.php</code></td><td>Produits visibles, recherche par nom et code, filtres, tri, pagination, bandeau d’accueil, redirection de <code>/catalogue</code>.</td></tr>
+        <tr><td><code class="file">tests/Feature/CheckoutTest.php</code></td><td>Commande avec remise, prix historiques, stock insuffisant, double envoi, annulation et stock rendu une seule fois.</td></tr>
+        <tr><td><code class="file">tests/Feature/AuthorizationTest.php</code></td><td>Commandes d’un autre client (403), pages admin interdites aux clients, toutes les pages s’affichent.</td></tr>
+        <tr><td><code class="file">tests/Feature/ExportTest.php</code></td><td>CSV des clients limités à leurs données, exports admin sans secret, filtres, ZIP, injection de formule.</td></tr>
+        <tr><td><code class="file">tests/Feature/ExportFormatsTest.php</code></td><td>Fichiers Excel (titre, en-tête, vrais nombres), PDF, classeurs complets, PDF de commande réservé au propriétaire.</td></tr>
+        <tr><td><code class="file">tests/Feature/AdminCrudTest.php</code></td><td>CRUD, validation, archivage au lieu de suppression, paire unique commande/produit.</td></tr>
+        <tr><td><code class="file">tests/Feature/ProductVisibilityAndImageTest.php</code></td><td>Case « Visible dans la boutique », envoi et affichage des images, images trop lourdes.</td></tr>
+        <tr><td><code class="file">tests/Feature/AjaxInteractionTest.php</code></td><td>Réponses JSON de l’ajout au panier et des favoris.</td></tr>
+        <tr><td><code class="file">tests/Unit/PriceCalculatorTest.php</code></td><td>Calculs en centimes et arrondi de la remise.</td></tr>
+        </tbody>
+    </table></div>
+    <figure class="code" data-file="tests/Feature/CheckoutTest.php">
+        <figcaption><span>tests/Feature/CheckoutTest.php</span><span>PHP</span></figcaption>
+        <pre><code>$this->assertSame(10, $order->discount_rate);
+$this->assertSame('174.70', $order->subtotal);
+$this->assertSame('17.47', $order->discount_amount);
+$this->assertSame('157.23', $order->total);</code></pre>
+    </figure>
+
+    <!-- ================================================================ -->
+    <h2 id="ch23">23. Écarts et comportements observés</h2>
+    <p>Ce que fait réellement le code, là où il diffère d’une attente possible ou du sujet initial :</p>
+    <ul>
+        <li><strong>Livraison</strong> : le bandeau supérieur affiche « Livraison partout au Maroc », mais l’application ne gère ni frais, ni zones,
+            ni transporteur : c’est un texte de présentation. Les commandes ont seulement un statut de suivi.</li>
+        <li><strong>Paiement</strong> : aucun paiement en ligne. La condition (LIV ou T30) est enregistrée avec la commande, comme dans le sujet.</li>
+        <li><strong>Client archivé</strong> : il disparaît des listes de l’administration, mais rien n’empêche son compte de se connecter et de commander.</li>
+        <li><strong>Comptes de démonstration</strong> : leur mot de passe <code>password</code> ne respecte pas la politique des mots de passe ;
+            le seeder écrit directement en base, sans passer par la validation.</li>
+        <li><strong>Contrôles réseau</strong> : la vérification du domaine de l’e-mail (DNS) est désactivée par défaut ; la vérification des mots de passe
+            divulgués (haveibeenpwned.com) est active mais ignorée sans Internet.</li>
+        <li><strong>Verrouillage</strong> : <code>lockForUpdate()</code> agit sous MySQL ; avec SQLite, la base entière est verrouillée pendant une
+            écriture, ce qui sérialise aussi les commandes.</li>
+        <li><strong>Images</strong> : les photos de démonstration sont des illustrations SVG générées ; l’administrateur peut les remplacer par de vraies photos.</li>
+        <li><strong>Bandeau d’accueil</strong> : affiché seulement sur la première page du catalogue sans filtre.</li>
+        <li><strong>Page d’accueil</strong> : <code>/</code> est le catalogue ; l’ancienne adresse <code>/catalogue</code> redirige vers <code>/</code>.</li>
+        <li><strong>Devise</strong> : dirham (<code>DH</code>), modifiable par <code>SHOP_CURRENCY</code>.</li>
+        <li><strong>Codes métier</strong> : générés à partir de l’<code>id</code> ; après suppression d’une ligne, son numéro n’est jamais réutilisé.</li>
+    </ul>
+
+    <!-- ================================================================ -->
+    <h2 id="ch24">24. Glossaire</h2>
+    <dl class="glossary">
+        <dt>Artisan</dt><dd>L’outil en ligne de commande de Laravel (<code>php artisan serve</code>, <code>migrate</code>, <code>route:list</code>, <code>test</code>).</dd>
+        <dt>Blade</dt><dd>Le langage de gabarits de Laravel : <code>{{ $variable }}</code> affiche une valeur (échappée contre le HTML), <code>@if</code>, <code>@foreach</code>, <code>@csrf</code>…</dd>
+        <dt>Cast</dt><dd>Conversion automatique d’une colonne : <code>'unit_price' => 'decimal:2'</code>, <code>'is_listed' => 'boolean'</code>, <code>'password' => 'hashed'</code>.</dd>
+        <dt>Clé étrangère (FK)</dt><dd>Colonne qui contient l’<code>id</code> d’une ligne d’une autre table.</dd>
+        <dt>Clé primaire (PK)</dt><dd>Colonne qui identifie chaque ligne d’une table, ici <code>id</code>.</dd>
+        <dt>Composer</dt><dd>Gestionnaire des bibliothèques PHP (<code class="file">composer.json</code>, dossier <code>vendor/</code>).</dd>
+        <dt>Contrôleur</dt><dd>Classe qui reçoit une requête, utilise les modèles et renvoie une vue, une redirection ou un fichier.</dd>
+        <dt>CSRF</dt><dd><em>Cross-Site Request Forgery</em> : attaque qui fait envoyer un formulaire à votre insu ; bloquée par le jeton <code>@csrf</code>.</dd>
+        <dt>DECIMAL</dt><dd>Type SQL à virgule fixe (ici 10 chiffres dont 2 décimales), adapté aux montants.</dd>
+        <dt>Eloquent</dt><dd>L’ORM de Laravel : chaque table est manipulée par une classe modèle.</dd>
+        <dt>Flash</dt><dd>Valeur gardée en session pour la requête suivante seulement (message de confirmation).</dd>
+        <dt>Hachage</dt><dd>Transformation à sens unique d’un mot de passe (bcrypt) ; on compare, on ne déchiffre jamais.</dd>
+        <dt>Idempotent</dt><dd>Qui produit le même résultat si on le répète : envoyer deux fois la même commande n’en crée qu’une.</dd>
+        <dt>Liaison de modèle</dt><dd>Laravel transforme un paramètre d’adresse en objet modèle (<code>{product:code}</code>).</dd>
+        <dt>Middleware</dt><dd>Filtre placé devant les routes (connexion obligatoire, rôle, limitation de débit…).</dd>
+        <dt>Migration</dt><dd>Fichier de création ou de modification de table, versionné avec le code.</dd>
+        <dt>Modèle</dt><dd>Classe qui représente une table et ses relations (<code>Product</code>, <code>Order</code>…).</dd>
+        <dt>N+1</dt><dd>Problème de performance : une requête par élément d’une liste ; évité avec <code>with()</code>.</dd>
+        <dt>Pivot</dt><dd>Table de liaison d’une relation plusieurs-à-plusieurs (<code>favorites</code>).</dd>
+        <dt>Policy</dt><dd>Classe d’autorisation liée à un modèle (<code>OrderPolicy</code>).</dd>
+        <dt>Portée (scope)</dt><dd>Condition de requête réutilisable déclarée dans un modèle (<code>scopeAvailable</code>).</dd>
+        <dt>Redirection</dt><dd>Réponse 302 qui demande au navigateur d’ouvrir une autre adresse.</dd>
+        <dt>Route</dt><dd>Association entre une méthode HTTP + une adresse et le code qui répond.</dd>
+        <dt>Seeder</dt><dd>Classe qui remplit la base avec des données de départ.</dd>
+        <dt>Service</dt><dd>Classe qui regroupe une logique métier (<code>Cart</code>, <code>OrderService</code>, <code>PriceCalculator</code>).</dd>
+        <dt>Session</dt><dd>Données gardées côté serveur pour un navigateur, identifié par un cookie.</dd>
+        <dt>Transaction</dt><dd>Groupe d’écritures validées ensemble ou annulées ensemble.</dd>
+        <dt>Trait</dt><dd>Bloc de méthodes PHP partagé par plusieurs classes (<code>HasBusinessCode</code>, <code>Archivable</code>).</dd>
+        <dt>Validation</dt><dd>Contrôle des données reçues avant de les utiliser.</dd>
+        <dt>Vue</dt><dd>Fichier Blade qui produit le HTML.</dd>
+    </dl>
+
+    <!-- ================================================================ -->
+    <h2 id="ch25">25. Tableau des routes et des fonctionnalités</h2>
+    <p>Les 59 routes de <code class="file">routes/web.php</code> (affichées par <code>php artisan route:list</code>). « Accès » indique les middlewares.</p>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Méthode</th><th>Adresse</th><th>Nom</th><th>Action</th><th>Accès</th><th>Chapitre</th></tr></thead>
+        <tbody>
+<!--ROUTES-->
+        <tr><td><span class="badge get">GET</span></td><td><code>/</code></td><td><code class="route">catalog.index</code></td><td><code>CatalogController@index</code></td><td>public</td><td><a href="boutique.html#ch7">7</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin</code></td><td><code class="route">admin.dashboard</code></td><td><code>Admin\DashboardController@index</code></td><td>auth, admin</td><td><a href="admin.html#ch14">14</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/clients</code></td><td><code class="route">admin.clients.index</code></td><td><code>Admin\ClientController@index</code></td><td>auth, admin</td><td><a href="admin.html#ch15">15</a></td></tr>
+        <tr><td><span class="badge post">POST</span></td><td><code>/admin/clients</code></td><td><code class="route">admin.clients.store</code></td><td><code>Admin\ClientController@store</code></td><td>auth, admin</td><td><a href="admin.html#ch15">15</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/clients/create</code></td><td><code class="route">admin.clients.create</code></td><td><code>Admin\ClientController@create</code></td><td>auth, admin</td><td><a href="admin.html#ch15">15</a></td></tr>
+        <tr><td><span class="badge put">PUT|PATCH</span></td><td><code>/admin/clients/{client}</code></td><td><code class="route">admin.clients.update</code></td><td><code>Admin\ClientController@update</code></td><td>auth, admin</td><td><a href="admin.html#ch15">15</a></td></tr>
+        <tr><td><span class="badge delete">DELETE</span></td><td><code>/admin/clients/{client}</code></td><td><code class="route">admin.clients.destroy</code></td><td><code>Admin\ClientController@destroy</code></td><td>auth, admin</td><td><a href="admin.html#ch15">15</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/clients/{client}/edit</code></td><td><code class="route">admin.clients.edit</code></td><td><code>Admin\ClientController@edit</code></td><td>auth, admin</td><td><a href="admin.html#ch15">15</a></td></tr>
+        <tr><td><span class="badge patch">PATCH</span></td><td><code>/admin/clients/{client}/restaurer</code></td><td><code class="route">admin.clients.restore</code></td><td><code>Admin\ClientController@restore</code></td><td>auth, admin</td><td><a href="admin.html#ch15">15</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/commandes</code></td><td><code class="route">admin.orders.index</code></td><td><code>Admin\OrderController@index</code></td><td>auth, admin</td><td><a href="admin.html#ch18">18</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/commandes/{order}</code></td><td><code class="route">admin.orders.show</code></td><td><code>Admin\OrderController@show</code></td><td>auth, admin</td><td><a href="admin.html#ch18">18</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/commandes/{order}/pdf</code></td><td><code class="route">admin.orders.pdf</code></td><td><code>Admin\OrderController@pdf</code></td><td>auth, admin</td><td><a href="admin.html#ch18">18</a></td></tr>
+        <tr><td><span class="badge patch">PATCH</span></td><td><code>/admin/commandes/{order}/statut</code></td><td><code class="route">admin.orders.status</code></td><td><code>Admin\OrderController@updateStatus</code></td><td>auth, admin</td><td><a href="admin.html#ch18">18</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/exports</code></td><td><code class="route">admin.exports.index</code></td><td><code>Admin\ExportController@index</code></td><td>auth, admin</td><td><a href="admin.html#ch19">19</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/exports/lara-shop-classeur-complet.xlsx</code></td><td><code class="route">admin.exports.workbook</code></td><td><code>Admin\ExportController@workbook</code></td><td>auth, admin</td><td><a href="admin.html#ch19">19</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/exports/lara-shop-export-complet.zip</code></td><td><code class="route">admin.exports.bundle</code></td><td><code>Admin\ExportController@bundle</code></td><td>auth, admin</td><td><a href="admin.html#ch19">19</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/exports/{dataset}.{format}</code></td><td><code class="route">admin.exports.download</code></td><td><code>Admin\ExportController@download</code></td><td>auth, admin</td><td><a href="admin.html#ch19">19</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/fournisseurs</code></td><td><code class="route">admin.suppliers.index</code></td><td><code>Admin\SupplierController@index</code></td><td>auth, admin</td><td><a href="admin.html#ch16">16</a></td></tr>
+        <tr><td><span class="badge post">POST</span></td><td><code>/admin/fournisseurs</code></td><td><code class="route">admin.suppliers.store</code></td><td><code>Admin\SupplierController@store</code></td><td>auth, admin</td><td><a href="admin.html#ch16">16</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/fournisseurs/create</code></td><td><code class="route">admin.suppliers.create</code></td><td><code>Admin\SupplierController@create</code></td><td>auth, admin</td><td><a href="admin.html#ch16">16</a></td></tr>
+        <tr><td><span class="badge put">PUT|PATCH</span></td><td><code>/admin/fournisseurs/{supplier}</code></td><td><code class="route">admin.suppliers.update</code></td><td><code>Admin\SupplierController@update</code></td><td>auth, admin</td><td><a href="admin.html#ch16">16</a></td></tr>
+        <tr><td><span class="badge delete">DELETE</span></td><td><code>/admin/fournisseurs/{supplier}</code></td><td><code class="route">admin.suppliers.destroy</code></td><td><code>Admin\SupplierController@destroy</code></td><td>auth, admin</td><td><a href="admin.html#ch16">16</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/fournisseurs/{supplier}/edit</code></td><td><code class="route">admin.suppliers.edit</code></td><td><code>Admin\SupplierController@edit</code></td><td>auth, admin</td><td><a href="admin.html#ch16">16</a></td></tr>
+        <tr><td><span class="badge patch">PATCH</span></td><td><code>/admin/fournisseurs/{supplier}/restaurer</code></td><td><code class="route">admin.suppliers.restore</code></td><td><code>Admin\SupplierController@restore</code></td><td>auth, admin</td><td><a href="admin.html#ch16">16</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/produits</code></td><td><code class="route">admin.products.index</code></td><td><code>Admin\ProductController@index</code></td><td>auth, admin</td><td><a href="admin.html#ch17">17</a></td></tr>
+        <tr><td><span class="badge post">POST</span></td><td><code>/admin/produits</code></td><td><code class="route">admin.products.store</code></td><td><code>Admin\ProductController@store</code></td><td>auth, admin</td><td><a href="admin.html#ch17">17</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/produits/create</code></td><td><code class="route">admin.products.create</code></td><td><code>Admin\ProductController@create</code></td><td>auth, admin</td><td><a href="admin.html#ch17">17</a></td></tr>
+        <tr><td><span class="badge put">PUT|PATCH</span></td><td><code>/admin/produits/{product}</code></td><td><code class="route">admin.products.update</code></td><td><code>Admin\ProductController@update</code></td><td>auth, admin</td><td><a href="admin.html#ch17">17</a></td></tr>
+        <tr><td><span class="badge delete">DELETE</span></td><td><code>/admin/produits/{product}</code></td><td><code class="route">admin.products.destroy</code></td><td><code>Admin\ProductController@destroy</code></td><td>auth, admin</td><td><a href="admin.html#ch17">17</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/admin/produits/{product}/edit</code></td><td><code class="route">admin.products.edit</code></td><td><code>Admin\ProductController@edit</code></td><td>auth, admin</td><td><a href="admin.html#ch17">17</a></td></tr>
+        <tr><td><span class="badge patch">PATCH</span></td><td><code>/admin/produits/{product}/restaurer</code></td><td><code class="route">admin.products.restore</code></td><td><code>Admin\ProductController@restore</code></td><td>auth, admin</td><td><a href="admin.html#ch17">17</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/catalogue</code></td><td>—</td><td><code>redirection vers catalog.index</code></td><td>public</td><td><a href="boutique.html#ch8">8</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/commande</code></td><td><code class="route">checkout.create</code></td><td><code>CheckoutController@create</code></td><td>auth, customer</td><td><a href="boutique.html#ch11">11</a></td></tr>
+        <tr><td><span class="badge post">POST</span></td><td><code>/commande</code></td><td><code class="route">checkout.store</code></td><td><code>CheckoutController@store</code></td><td>auth, customer</td><td><a href="boutique.html#ch11">11</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/connexion</code></td><td><code class="route">login</code></td><td><code>Auth\LoginController@create</code></td><td>guest</td><td><a href="boutique.html#ch6">6</a></td></tr>
+        <tr><td><span class="badge post">POST</span></td><td><code>/connexion</code></td><td>—</td><td><code>Auth\LoginController@store</code></td><td>guest, throttle:10,1</td><td><a href="boutique.html#ch6">6</a></td></tr>
+        <tr><td><span class="badge post">POST</span></td><td><code>/deconnexion</code></td><td><code class="route">logout</code></td><td><code>Auth\LoginController@destroy</code></td><td>auth</td><td><a href="boutique.html#ch6">6</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/favoris</code></td><td><code class="route">favorites.index</code></td><td><code>FavoriteController@index</code></td><td>auth, customer</td><td><a href="boutique.html#ch9">9</a></td></tr>
+        <tr><td><span class="badge post">POST</span></td><td><code>/favoris/{product}</code></td><td><code class="route">favorites.toggle</code></td><td><code>FavoriteController@toggle</code></td><td>auth, customer</td><td><a href="boutique.html#ch9">9</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/inscription</code></td><td><code class="route">register</code></td><td><code>Auth\RegisterController@create</code></td><td>guest</td><td><a href="boutique.html#ch6">6</a></td></tr>
+        <tr><td><span class="badge post">POST</span></td><td><code>/inscription</code></td><td>—</td><td><code>Auth\RegisterController@store</code></td><td>guest</td><td><a href="boutique.html#ch6">6</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/mes-commandes</code></td><td><code class="route">orders.index</code></td><td><code>OrderController@index</code></td><td>auth, customer</td><td><a href="boutique.html#ch12">12</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/mes-commandes/{order}</code></td><td><code class="route">orders.show</code></td><td><code>OrderController@show</code></td><td>auth, customer</td><td><a href="boutique.html#ch12">12</a></td></tr>
+        <tr><td><span class="badge post">POST</span></td><td><code>/mes-commandes/{order}/annuler</code></td><td><code class="route">orders.cancel</code></td><td><code>OrderController@cancel</code></td><td>auth, customer</td><td><a href="boutique.html#ch12">12</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/mes-commandes/{order}/imprimer</code></td><td><code class="route">orders.print</code></td><td><code>OrderController@print</code></td><td>auth, customer</td><td><a href="boutique.html#ch12">12</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/mes-commandes/{order}/pdf</code></td><td><code class="route">orders.pdf</code></td><td><code>OrderController@pdf</code></td><td>auth, customer</td><td><a href="boutique.html#ch12">12</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/mes-donnees</code></td><td><code class="route">my-data.index</code></td><td><code>AccountDataController@index</code></td><td>auth, customer</td><td><a href="boutique.html#ch13">13</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/mes-donnees/archive.zip</code></td><td><code class="route">my-data.bundle</code></td><td><code>AccountDataController@bundle</code></td><td>auth, customer</td><td><a href="boutique.html#ch13">13</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/mes-donnees/classeur.xlsx</code></td><td><code class="route">my-data.workbook</code></td><td><code>AccountDataController@workbook</code></td><td>auth, customer</td><td><a href="boutique.html#ch13">13</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/mes-donnees/rapport.pdf</code></td><td><code class="route">my-data.report</code></td><td><code>AccountDataController@report</code></td><td>auth, customer</td><td><a href="boutique.html#ch13">13</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/mes-donnees/{dataset}.{format}</code></td><td><code class="route">my-data.download</code></td><td><code>AccountDataController@download</code></td><td>auth, customer</td><td><a href="boutique.html#ch13">13</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/panier</code></td><td><code class="route">cart.index</code></td><td><code>CartController@index</code></td><td>public</td><td><a href="boutique.html#ch10">10</a></td></tr>
+        <tr><td><span class="badge post">POST</span></td><td><code>/panier</code></td><td><code class="route">cart.store</code></td><td><code>CartController@store</code></td><td>public</td><td><a href="boutique.html#ch10">10</a></td></tr>
+        <tr><td><span class="badge patch">PATCH</span></td><td><code>/panier/{product}</code></td><td><code class="route">cart.update</code></td><td><code>CartController@update</code></td><td>public</td><td><a href="boutique.html#ch10">10</a></td></tr>
+        <tr><td><span class="badge delete">DELETE</span></td><td><code>/panier/{product}</code></td><td><code class="route">cart.destroy</code></td><td><code>CartController@destroy</code></td><td>public</td><td><a href="boutique.html#ch10">10</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/produits/{product}</code></td><td><code class="route">catalog.show</code></td><td><code>CatalogController@show</code></td><td>public</td><td><a href="boutique.html#ch7">7</a></td></tr>
+        <tr><td><span class="badge get">GET</span></td><td><code>/profil</code></td><td><code class="route">profile.edit</code></td><td><code>ProfileController@edit</code></td><td>auth, customer</td><td><a href="boutique.html#ch6">6</a></td></tr>
+        <tr><td><span class="badge put">PUT</span></td><td><code>/profil</code></td><td><code class="route">profile.update</code></td><td><code>ProfileController@update</code></td><td>auth, customer</td><td><a href="boutique.html#ch6">6</a></td></tr>
+        <tr><td><span class="badge put">PUT</span></td><td><code>/profil/mot-de-passe</code></td><td><code class="route">profile.password</code></td><td><code>ProfileController@updatePassword</code></td><td>auth, customer</td><td><a href="boutique.html#ch6">6</a></td></tr>
+<!--/ROUTES-->
+        </tbody>
+    </table></div>
+
+    <nav class="chapter-nav" aria-label="Pages du guide">
+        <a href="admin.html">← Partie 3 : l’administration</a>
+        <a href="index.html">Retour au début</a>
+    </nav>
+    <footer class="doc-footer">Guide écrit à partir du code de ce dossier. Les extraits sont copiés depuis les fichiers indiqués.</footer>
+</main>
+</div>
+</body>
+</html>

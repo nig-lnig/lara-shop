@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Guide Lara-Shop · La boutique</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#contenu">Aller au contenu</a>
+<div class="layout">
+<!--NAV:boutique-->
+<nav class="toc" aria-label="Sommaire du guide">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">L</span> Guide Lara-Shop</a>
+<details open><summary>Sommaire</summary>
+<h2>Partie 1 · Prise en main</h2><ol>
+<li><a href="index.html#ch1"><span class="num">1.</span>Ce que fait l’application</a></li>
+<li><a href="index.html#ch2"><span class="num">2.</span>Lancer le projet</a></li>
+<li><a href="index.html#ch3"><span class="num">3.</span>Se repérer dans les dossiers</a></li>
+<li><a href="index.html#ch4"><span class="num">4.</span>Le modèle de données</a></li>
+<li><a href="index.html#ch5"><span class="num">5.</span>Le parcours d’une requête</a></li>
+</ol>
+<h2>Partie 2 · La boutique</h2><ol>
+<li><a href="#ch6"><span class="num">6.</span>Inscription, connexion, profil</a></li>
+<li><a href="#ch7"><span class="num">7.</span>Catalogue et fiche produit</a></li>
+<li><a href="#ch8"><span class="num">8.</span>Recherche, filtres, tri</a></li>
+<li><a href="#ch9"><span class="num">9.</span>Favoris</a></li>
+<li><a href="#ch10"><span class="num">10.</span>Panier</a></li>
+<li><a href="#ch11"><span class="num">11.</span>Passer commande</a></li>
+<li><a href="#ch12"><span class="num">12.</span>Mes commandes et statuts</a></li>
+<li><a href="#ch13"><span class="num">13.</span>Mes données</a></li>
+</ol>
+<h2>Partie 3 · L’administration</h2><ol>
+<li><a href="admin.html#ch14"><span class="num">14.</span>Tableau de bord</a></li>
+<li><a href="admin.html#ch15"><span class="num">15.</span>Clients (CRUD)</a></li>
+<li><a href="admin.html#ch16"><span class="num">16.</span>Fournisseurs (CRUD)</a></li>
+<li><a href="admin.html#ch17"><span class="num">17.</span>Produits, images, stock</a></li>
+<li><a href="admin.html#ch18"><span class="num">18.</span>Commandes (admin)</a></li>
+<li><a href="admin.html#ch19"><span class="num">19.</span>Exports CSV, Excel, PDF</a></li>
+</ol>
+<h2>Partie 4 · Références</h2><ol>
+<li><a href="reference.html#ch20"><span class="num">20.</span>Notions Laravel</a></li>
+<li><a href="reference.html#ch21"><span class="num">21.</span>Interface et JavaScript</a></li>
+<li><a href="reference.html#ch22"><span class="num">22.</span>Tests automatisés</a></li>
+<li><a href="reference.html#ch23"><span class="num">23.</span>Écarts observés</a></li>
+<li><a href="reference.html#ch24"><span class="num">24.</span>Glossaire</a></li>
+<li><a href="reference.html#ch25"><span class="num">25.</span>Routes et fonctionnalités</a></li>
+</ol>
+</details></nav>
+<!--/NAV-->
+
+<main id="contenu">
+    <p class="eyebrow">Partie 2</p>
+    <h1>La boutique, fonctionnalité par fonctionnalité</h1>
+    <p class="lead">Chaque chapitre suit le même plan en six étapes. Les noms de routes (<code>cart.store</code>…) se retrouvent avec
+        <code>php artisan route:list</code> ; le <a href="reference.html#ch25">tableau des routes</a> les rassemble.</p>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch6">
+    <h2 id="ch6">6. Inscription, connexion et profil</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Dans l’en-tête, le lien <strong>Connexion</strong> mène à <code>/connexion</code> ; sous le formulaire, « Créer un compte » mène à
+        <code>/inscription</code>. Une fois connecté, le menu <strong>Mon compte</strong> donne accès à « Profil et adresse »
+        (<code>/profil</code>) et à « Déconnexion ».</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd><span class="badge get">GET</span>/<span class="badge post">POST</span> <code>/inscription</code> (<code class="route">register</code>) ·
+            <span class="badge get">GET</span>/<span class="badge post">POST</span> <code>/connexion</code> (<code class="route">login</code>, limité à 10 essais par minute) ·
+            <span class="badge post">POST</span> <code>/deconnexion</code> (<code class="route">logout</code>) ·
+            <span class="badge get">GET</span> <code>/profil</code> (<code class="route">profile.edit</code>) ·
+            <span class="badge put">PUT</span> <code>/profil</code> (<code class="route">profile.update</code>) ·
+            <span class="badge put">PUT</span> <code>/profil/mot-de-passe</code> (<code class="route">profile.password</code>)</dd>
+        <dt>Contrôleurs</dt><dd><code class="action">RegisterController@store</code>, <code class="action">LoginController@store</code>,
+            <code class="action">LoginController@destroy</code>, <code class="action">ProfileController@update</code>, <code class="action">ProfileController@updatePassword</code></dd>
+        <dt>Modèles</dt><dd><code class="file">app/Models/User.php</code>, <code class="file">app/Models/Client.php</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/auth/register.blade.php</code>, <code class="file">resources/views/auth/login.blade.php</code>,
+            <code class="file">resources/views/profile/edit.blade.php</code>, composants <code class="file">resources/views/components/input.blade.php</code>
+            et <code class="file">resources/views/components/password-field.blade.php</code></dd>
+        <dt>Validation</dt><dd><code>User::emailRules()</code>, <code>Password::defaults()</code> défini dans
+            <code class="file">app/Providers/AppServiceProvider.php</code>, messages dans <code class="file">lang/fr/validation.php</code></dd>
+        <dt>Accès</dt><dd>middleware <code>guest</code> (inscription, connexion), <code>auth</code> + <code>customer</code> (profil)</dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p><strong>Inscription.</strong> Le contrôleur met l’e-mail en minuscules, valide le formulaire, puis crée <em>deux</em> lignes dans une
+        seule transaction : le client du PDF (type « Particulier » et remise 0 % par défaut) et le compte de connexion qui pointe vers lui.</p>
+    <figure class="code" data-file="app/Http/Controllers/Auth/RegisterController.php">
+        <figcaption><span>app/Http/Controllers/Auth/RegisterController.php</span><span>PHP</span></figcaption>
+        <pre><code>$user = DB::transaction(function () use ($data) {
+    $client = Client::create([
+        'name' => $data['name'],
+        'street' => $data['street'],
+        'postal_code' => $data['postal_code'],
+        'city' => $data['city'],
+        'type' => Client::DEFAULT_TYPE, // admin can change it later
+        'special_discount' => 0,        // admin can change it later
+    ]);
+
+    $user = new User([
+        'name' => $data['name'],
+        'email' => $data['email'],
+        'password' => $data['password'], // hashed automatically (cast "hashed")
+    ]);
+    $user->role = User::ROLE_CUSTOMER;
+    $user->client_id = $client->id;
+    $user->save();
+
+    return $user;
+});
+
+Auth::login($user);
+$request->session()->regenerate();</code></pre>
+    </figure>
+    <p>Le rôle et le client sont affectés <em>à la main</em> : ils ne figurent pas dans <code>$fillable</code> du modèle
+        <code class="file">app/Models/User.php</code>. Un utilisateur malin qui ajouterait un champ <code>role=admin</code> au formulaire
+        n’obtiendrait donc rien (un test le vérifie dans <code class="file">tests/Feature/AuthTest.php</code>).</p>
+    <p><strong>Règles de l’e-mail et du mot de passe.</strong> Elles sont écrites une seule fois et réutilisées par l’inscription et par la page profil :</p>
+    <figure class="code" data-file="app/Providers/AppServiceProvider.php">
+        <figcaption><span>app/Providers/AppServiceProvider.php</span><span>PHP</span></figcaption>
+        <pre><code>Password::defaults(function () {
+    $rule = Password::min(config('shop.password_min_length'))->letters()->mixedCase()->numbers()->symbols();
+
+    return config('shop.password_leak_check') &amp;&amp; ! app()->runningUnitTests() ? $rule->uncompromised() : $rule;
+});</code></pre>
+    </figure>
+    <figure class="code" data-file="app/Models/User.php">
+        <figcaption><span>app/Models/User.php</span><span>PHP</span></figcaption>
+        <pre><code>public static function emailRules(?int $ignoreUserId = null): array
+{
+    $format = 'email:rfc,strict,filter'.(config('shop.email_dns_check') ? ',dns' : '');
+
+    return ['required', 'string', 'max:190', $format, Rule::unique('users', 'email')->ignore($ignoreUserId)];
+}</code></pre>
+    </figure>
+    <p>Le mot de passe doit donc contenir au moins 10 caractères, une majuscule, une minuscule, un chiffre et un symbole ; la liste des
+        règles se coche en direct grâce à un petit script (<code class="file">public/js/app.js</code>, section 5c). <code>uncompromised()</code>
+        refuse aussi un mot de passe présent dans une fuite publique (service haveibeenpwned.com, ignoré sans connexion Internet).</p>
+    <p><strong>Connexion.</strong> <code>Auth::attempt()</code> cherche le compte par e-mail et compare le mot de passe saisi avec le
+        <em>hachage</em> enregistré (le mot de passe en clair n’est jamais stocké) :</p>
+    <figure class="code" data-file="app/Http/Controllers/Auth/LoginController.php">
+        <figcaption><span>app/Http/Controllers/Auth/LoginController.php</span><span>PHP</span></figcaption>
+        <pre><code>// Auth::attempt checks the email and compares the password with the stored hash.
+if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+    throw ValidationException::withMessages([
+        'email' => 'Ces identifiants ne correspondent à aucun compte.',
+    ]);
+}
+
+$request->session()->regenerate(); // protection against session fixation</code></pre>
+    </figure>
+    <p>Ensuite, <code>redirect()->intended()</code> renvoie l’utilisateur vers la page qu’il voulait voir avant d’être arrêté par le
+        middleware <code>auth</code> (par exemple <code>/commande</code>) ; à défaut, un administrateur va sur <code>/admin</code> et un client
+        sur le catalogue. La <strong>déconnexion</strong> (<code class="action">LoginController@destroy</code>) invalide la session et régénère le jeton CSRF.</p>
+    <p><strong>Profil.</strong> <code class="action">ProfileController@update</code> enregistre nom, e-mail et adresse. Le type de client et
+        la remise sont affichés mais jamais lus dans le formulaire : seul l’administrateur peut les changer.</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <p>Après l’inscription, le visiteur est connecté et voit « Bienvenue … ! Votre compte client Cli-000009 est créé. » Après la connexion,
+        « Bonjour … ! ». Sur le profil, « Votre profil a été mis à jour. ».</p>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Champ manquant, e-mail invalide (<code>nadia@localhost</code>, sans point dans le domaine) ou déjà utilisé, mot de passe trop
+            faible : retour au formulaire, message sous le champ concerné et résumé cliquable en haut de page.</li>
+        <li>Mauvais identifiants : « Ces identifiants ne correspondent à aucun compte. »</li>
+        <li>Plus de 10 tentatives de connexion en une minute : page 429 « Trop de tentatives » (middleware <code>throttle:10,1</code>).</li>
+        <li>Un visiteur qui ouvre <code>/profil</code> est envoyé sur <code>/connexion</code> ; un administrateur reçoit une page 403
+            « Cette page est réservée aux comptes clients. ».</li>
+    </ul>
+    <figure class="shot"><img src="img/register-errors.png" alt="Formulaire d’inscription avec les messages d’erreur sous l’e-mail et le mot de passe" loading="lazy">
+        <figcaption>E-mail <code>test@localhost</code> et mot de passe <code>cahier2026</code> : les erreurs s’affichent à côté des champs.</figcaption></figure>
+    <div class="callout try"><strong>À essayer</strong><p>Inscrivez-vous avec le mot de passe <code>cahier2026</code> : le message demande une
+        majuscule et une minuscule ainsi qu’un symbole. Recommencez avec <code>Cahier#Bleu2026</code> : le compte est créé.</p></div>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Middleware</strong> : filtre placé devant une route. <code>guest</code> réserve l’inscription aux visiteurs, <code>auth</code>
+            exige d’être connecté, <code>customer</code> (fichier <code class="file">app/Http/Middleware/EnsureUserIsCustomer.php</code>) exige un compte client.</li>
+        <li><strong>Hachage</strong> : transformation à sens unique du mot de passe. Le <em>cast</em> <code>'password' => 'hashed'</code> du modèle
+            <code>User</code> le fait automatiquement.</li>
+        <li><strong>Affectation de masse et <code>$fillable</code></strong> : liste des colonnes qu’on peut remplir d’un coup avec
+            <code>create([...])</code> ; les autres sont protégées.</li>
+        <li><strong>Transaction</strong> : un groupe d’écritures « tout ou rien » (<code>DB::transaction</code>), voir le <a href="#ch11">chapitre 11</a>.</li>
+        <li><strong>Session</strong> : mémoire côté serveur liée au navigateur par un cookie ; <code>regenerate()</code> change son identifiant après connexion.</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch7">
+    <h2 id="ch7">7. Le catalogue et la fiche produit</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>La page d’accueil <code>/</code> <em>est</em> le catalogue. La barre des familles (Tout le catalogue, Papeterie…) et le logo y mènent
+        aussi. Cliquer sur une carte ouvre la fiche <code>/produits/Pr-0000xx</code>.</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd><span class="badge get">GET</span> <code>/</code> (<code class="route">catalog.index</code>) ·
+            <span class="badge get">GET</span> <code>/produits/{product:code}</code> (<code class="route">catalog.show</code>)</dd>
+        <dt>Contrôleur</dt><dd><code class="action">CatalogController@index</code>, <code class="action">CatalogController@show</code></dd>
+        <dt>Modèle</dt><dd><code class="file">app/Models/Product.php</code> : portées <code>available()</code>, <code>filter()</code>, <code>sortBy()</code>, méthodes <code>isLowStock()</code>, <code>isPurchasable()</code>, <code>imageUrl()</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/catalog/index.blade.php</code>, <code class="file">resources/views/catalog/_card.blade.php</code>,
+            <code class="file">resources/views/catalog/show.blade.php</code>, composants <code class="file">resources/views/components/product-image.blade.php</code>,
+            <code class="file">resources/views/components/stock-badge.blade.php</code>, <code class="file">resources/views/components/add-to-cart.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <ol class="flow">
+        <li><code class="action">CatalogController@index</code> lit les filtres de l’adresse (<a href="#ch8">chapitre 8</a>).</li>
+        <li>Il demande les produits <strong>disponibles</strong> : non archivés et visibles en boutique. La portée <code>available()</code>
+            résume cette règle une fois pour toutes.</li>
+        <li><code>with('supplier')</code> charge les fournisseurs en une requête (au lieu d’une par carte) ; <code>paginate()</code> découpe
+            en pages de 12 (<code>config('shop.per_page')</code>).</li>
+        <li>Il récupère aussi les favoris du client connecté (pour remplir les cœurs) et le nombre d’articles par famille.</li>
+        <li>La vue affiche le <strong>bandeau d’accueil</strong> uniquement si aucun filtre n’est actif et qu’on est en page 1, puis une carte
+            par produit grâce à <code>@include('catalog._card')</code>.</li>
+    </ol>
+    <figure class="code" data-file="app/Models/Product.php">
+        <figcaption><span>app/Models/Product.php</span><span>PHP</span></figcaption>
+        <pre><code>/** Products customers can see and buy: not archived AND listed in the shop. */
+public function scopeAvailable(Builder $query): Builder
+{
+    return $query->active()->where('is_listed', true);
+}</code></pre>
+    </figure>
+    <p>Chaque carte montre l’image (ou une tuile colorée de la famille si l’image manque), le prix formaté par <code>money()</code>
+        (<code class="file">app/helpers.php</code>), et un badge de stock :</p>
+    <figure class="code" data-file="resources/views/components/stock-badge.blade.php">
+        <figcaption><span>resources/views/components/stock-badge.blade.php</span><span>Blade</span></figcaption>
+        <pre><code>@if ($product->stock === 0)
+    &lt;span class="stock stock-out"&gt;Rupture de stock&lt;/span&gt;
+@elseif ($product->isLowStock())
+    &lt;span class="stock stock-low"&gt;Plus que {{ $product->stock }} en stock&lt;/span&gt;
+@else
+    &lt;span class="stock stock-ok"&gt;En stock&lt;/span&gt;
+@endif</code></pre>
+    </figure>
+    <p>La fiche produit a été détaillée au <a href="index.html#ch5">chapitre 5</a> : elle regroupe prix, stock, quantité et bouton
+        « Ajouter au panier » dans un même encadré, puis quatre produits de la même famille.</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <figure class="shot"><img src="img/desktop-03-product-added.png" alt="Fiche du produit Stylos bille bleus avec l’encadré d’achat et le message « Ajouté au panier »" loading="lazy">
+        <figcaption>La fiche <code>/produits/Pr-000017</code> juste après un ajout au panier.</figcaption></figure>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Code inexistant, produit archivé ou masqué : page 404 pour les clients. Un administrateur voit la fiche avec un bandeau
+            « Aperçu administrateur : ce produit est masqué… ».</li>
+        <li>Produit en rupture : le bouton devient « Indisponible » et il est désactivé.</li>
+        <li>Image absente ou introuvable : l’attribut <code>onerror="this.remove()"</code> retire l’image et laisse voir la tuile de la famille.</li>
+    </ul>
+    <div class="callout try"><strong>À essayer</strong><p>Ouvrez <code>/produits/Pr-000008</code> (chemises cartonnées, stock 0) : badge
+        « Rupture de stock » et bouton désactivé.</p></div>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Portée de requête (scope)</strong> : une méthode <code>scopeXxx</code> du modèle devient <code>Product::xxx()</code> et
+            ajoute des conditions réutilisables.</li>
+        <li><strong>Chargement anticipé</strong> (<code>with()</code>) : évite le problème « N+1 » (une requête par carte).</li>
+        <li><strong>Composant Blade</strong> : un morceau de vue réutilisable appelé comme une balise, <code>&lt;x-stock-badge :product="$product" /&gt;</code> ;
+            <code>@props</code> déclare ses paramètres.</li>
+        <li><strong><code>compact()</code></strong> : fonction PHP qui transforme des variables en tableau <code>['products' => $products, …]</code> pour la vue.</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch8">
+    <h2 id="ch8">8. Recherche, filtres, tri et pagination</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Le champ <strong>Rechercher</strong> de l’en-tête, le panneau <strong>Filtres</strong> (à gauche sur ordinateur, panneau qui monte du bas
+        sur téléphone avec le bouton « Filtres »), la liste <strong>Trier par</strong> et les liens de pagination. Chaque filtre actif apparaît
+        en « pastille » avec une croix pour le retirer.</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Route</dt><dd><span class="badge get">GET</span> <code>/</code> (<code class="route">catalog.index</code>) avec des paramètres : <code>?q=cahier&amp;family=PA&amp;min_price=5&amp;max_price=50&amp;in_stock=1&amp;sort=price_asc&amp;page=2</code></dd>
+        <dt>Code</dt><dd><code class="action">CatalogController@index</code>, <code>Product::scopeFilter()</code>, <code>Product::scopeSortBy()</code>, constante <code>Product::SORTS</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/catalog/index.blade.php</code> (formulaire, pastilles), <code class="file">resources/views/partials/pagination.blade.php</code></dd>
+        <dt>Script</dt><dd><code class="file">public/js/app.js</code> : panneau mobile (section 2), tri envoyé dès le changement (section 3, <code>data-auto-submit</code>)</dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p>Le formulaire de recherche utilise la méthode <strong>GET</strong> : les critères sont écrits dans l’adresse. On peut donc copier
+        l’adresse, revenir en arrière ou paginer sans perdre les filtres. Le contrôleur ne fait jamais confiance à ces valeurs : il garde
+        seulement les familles et tris connus, convertit les prix en nombres et ignore le reste.</p>
+    <figure class="code" data-file="app/Http/Controllers/CatalogController.php">
+        <figcaption><span>app/Http/Controllers/CatalogController.php</span><span>PHP</span></figcaption>
+        <pre><code>$filters = array_filter([
+    'q' => mb_substr($get('q'), 0, 100),
+    'family' => array_key_exists($get('family'), Product::FAMILIES) ? $get('family') : null,
+    'min_price' => is_numeric($get('min_price')) ? max(0, (float) $get('min_price')) : null,
+    'max_price' => is_numeric($get('max_price')) ? max(0, (float) $get('max_price')) : null,
+    'sort' => array_key_exists($get('sort'), Product::SORTS) ? $get('sort') : null,
+    'in_stock' => $get('in_stock') === '1' ? '1' : null,
+], fn ($value) => $value !== null &amp;&amp; $value !== '');</code></pre>
+    </figure>
+    <p>Le modèle applique ensuite chaque filtre seulement s’il est présent, grâce à <code>when()</code>. La recherche cherche le texte dans la
+        désignation <em>ou</em> dans le code produit (<code>LIKE '%cahier%'</code>) :</p>
+    <figure class="code" data-file="app/Models/Product.php">
+        <figcaption><span>app/Models/Product.php</span><span>PHP</span></figcaption>
+        <pre><code>public function scopeFilter(Builder $query, array $filters): Builder
+{
+    return $query
+        ->when($filters['q'] ?? null, function ($q, $search) {
+            $q->where(fn ($w) => $w->where('designation', 'like', "%{$search}%")
+                ->orWhere('code', 'like', "%{$search}%"));
+        })
+        ->when($filters['family'] ?? null, fn ($q, $family) => $q->where('family', $family))
+        ->when(is_numeric($filters['min_price'] ?? null), fn ($q) => $q->where('unit_price', '>=', $filters['min_price']))
+        ->when(is_numeric($filters['max_price'] ?? null), fn ($q) => $q->where('unit_price', '&lt;=', $filters['max_price']))</code></pre>
+    </figure>
+    <p>Enfin, <code>paginate(12)->withQueryString()</code> ajoute les filtres aux liens « Suivant / Précédent ». Le HTML de la pagination
+        vient de <code class="file">resources/views/partials/pagination.blade.php</code>, déclaré par <code>Paginator::defaultView()</code>
+        dans <code class="file">app/Providers/AppServiceProvider.php</code>. Les pastilles utilisent <code>request()->fullUrlWithoutQuery([$key, 'page'])</code>
+        pour fabriquer l’adresse « sans ce filtre ».</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <div class="shots-2">
+        <figure class="shot"><img src="img/desktop-02-catalog-filtered.png" alt="Catalogue filtré sur Bureautique, prix maximum 100 DH, tri prix décroissant, avec deux pastilles de filtres" loading="lazy">
+            <figcaption><code>/?family=BU&amp;max_price=100&amp;sort=price_desc</code></figcaption></figure>
+        <figure class="shot"><img src="img/mobile-02-filter-sheet.png" alt="Sur téléphone, panneau des filtres ouvert depuis le bas de l’écran" loading="lazy">
+            <figcaption>Sur téléphone, le panneau monte du bas.</figcaption></figure>
+    </div>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Valeurs fantaisistes (<code>/?family=XX&amp;sort=hack&amp;min_price=abc</code>) : elles sont ignorées, la page s’affiche normalement
+            (test <code>test_invalid_filters_are_ignored</code> dans <code class="file">tests/Feature/CatalogTest.php</code>).</li>
+        <li>Aucun résultat : message « Aucun article trouvé » et lien « Voir tout le catalogue ».</li>
+        <li>Les anciennes adresses <code>/catalogue?...</code> redirigent vers <code>/</code> en gardant les filtres.</li>
+    </ul>
+    <div class="callout try"><strong>À essayer</strong><p>Tapez <code>Pr-000012</code> dans la recherche : seule la calculatrice s’affiche, car
+        la recherche porte aussi sur le code.</p></div>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>GET ou POST</strong> : GET lit (recherche, liens partageables), POST/PUT/PATCH/DELETE modifient.</li>
+        <li><strong>Chaîne de requête</strong> (<em>query string</em>) : la partie après <code>?</code> ; lue avec <code>$request->query('q')</code>.</li>
+        <li><strong>Pagination</strong> : <code>paginate()</code> renvoie une page de résultats et les informations pour les liens.</li>
+        <li><strong>Amélioration progressive</strong> : sans JavaScript, le formulaire fonctionne avec son bouton ; avec JavaScript, le tri s’applique dès le choix.</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch9">
+    <h2 id="ch9">9. Les favoris</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Le cœur en haut à droite d’une carte, ou le bouton « Ajouter aux favoris » de la fiche produit (clients connectés). La page
+        <code>/favoris</code> liste les produits gardés.</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd><span class="badge post">POST</span> <code>/favoris/{product}</code> (<code class="route">favorites.toggle</code>) ·
+            <span class="badge get">GET</span> <code>/favoris</code> (<code class="route">favorites.index</code>)</dd>
+        <dt>Contrôleur</dt><dd><code class="action">FavoriteController@toggle</code>, <code class="action">FavoriteController@index</code></dd>
+        <dt>Base</dt><dd>table pivot <code>favorites</code> (<code class="file">database/migrations/2026_11_23_000007_create_favorites_table.php</code>), relation <code>User::favoriteProducts()</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/components/favorite-button.blade.php</code>, <code class="file">resources/views/favorites/index.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p>Le bouton est un vrai formulaire POST (avec <code>@csrf</code>). Le contrôleur appelle <code>toggle()</code> sur la relation
+        plusieurs-à-plusieurs : la ligne pivot est ajoutée si elle manque, retirée si elle existe.</p>
+    <figure class="code" data-file="app/Http/Controllers/FavoriteController.php">
+        <figcaption><span>app/Http/Controllers/FavoriteController.php</span><span>PHP</span></figcaption>
+        <pre><code>$result = $request->user()->favoriteProducts()->toggle($product->id);
+
+$isFavorite = $result['attached'] !== [];</code></pre>
+    </figure>
+    <p>Si la demande vient du script (<code>fetch</code>, en-tête <code>Accept: application/json</code>), la réponse est du JSON
+        <code>{"message": …, "favorite": true}</code> et la page ne se recharge pas : le cœur se remplit tout de suite et un lecteur d’écran
+        annonce le message. Sans JavaScript, le contrôleur redirige vers la page précédente avec un message.</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <p>Le cœur change d’état (<code>aria-pressed="true"</code>) et le produit apparaît sur <code>/favoris</code>, présenté avec les mêmes cartes que le catalogue.</p>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Visiteur non connecté : pas de cœur sur les cartes ; la route renvoie vers <code>/connexion</code>.</li>
+        <li>Administrateur : 403 (les favoris sont réservés aux clients).</li>
+        <li>Si le serveur répond par une erreur, le script remet le cœur dans son état précédent.</li>
+        <li>Un produit masqué ou archivé reste dans la table mais n’apparaît plus sur <code>/favoris</code> (portée <code>available()</code>).</li>
+    </ul>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Relation plusieurs-à-plusieurs</strong> : <code>belongsToMany(Product::class, 'favorites')</code> ; méthodes <code>attach</code>, <code>detach</code>, <code>toggle</code>.</li>
+        <li><strong>Index unique</strong> <code>(user_id, product_id)</code> : un produit ne peut être deux fois favori du même compte.</li>
+        <li><strong><code>$request->expectsJson()</code></strong> : répondre en JSON au script, en HTML au navigateur.</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch10">
+    <h2 id="ch10">10. Le panier</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Le bouton <strong>Ajouter au panier</strong> d’une carte ou de la fiche produit (avec le sélecteur de quantité −/+), puis le
+        bouton <strong>Panier</strong> de l’en-tête qui affiche le nombre d’articles.</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd><span class="badge get">GET</span> <code>/panier</code> (<code class="route">cart.index</code>) ·
+            <span class="badge post">POST</span> <code>/panier</code> (<code class="route">cart.store</code>) ·
+            <span class="badge patch">PATCH</span> <code>/panier/{product}</code> (<code class="route">cart.update</code>) ·
+            <span class="badge delete">DELETE</span> <code>/panier/{product}</code> (<code class="route">cart.destroy</code>)</dd>
+        <dt>Contrôleur</dt><dd><code class="action">CartController@store</code>, <code class="action">CartController@update</code>, <code class="action">CartController@destroy</code>, <code class="action">CartController@index</code></dd>
+        <dt>Services</dt><dd><code class="file">app/Services/Cart.php</code> (le panier en session), <code class="file">app/Services/PriceCalculator.php</code> (les montants)</dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/cart/index.blade.php</code>, <code class="file">resources/views/components/add-to-cart.blade.php</code>, <code class="file">resources/views/partials/totals.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p>Le panier vit dans la <strong>session</strong> : un visiteur peut le remplir avant de se connecter, et il est conservé à la connexion.
+        On n’y range que des identifiants et des quantités, jamais de prix :</p>
+    <figure class="code" data-file="app/Services/Cart.php">
+        <figcaption><span>app/Services/Cart.php</span><span>PHP</span></figcaption>
+        <pre><code>public function set(int $productId, int $quantity): void
+{
+    $items = $this->items();
+
+    if ($quantity &lt;= 0) {
+        unset($items[$productId]);
+    } else {
+        $items[$productId] = $quantity;
+    }
+
+    session([self::KEY => $items]);
+}</code></pre>
+    </figure>
+    <p>Ajouter un article (<code class="action">CartController@store</code>) :</p>
+    <figure class="code" data-file="app/Http/Controllers/CartController.php">
+        <figcaption><span>app/Http/Controllers/CartController.php</span><span>PHP</span></figcaption>
+        <pre><code>$data = $request->validate([
+    'product_id' => ['required', 'integer', 'exists:products,id'],
+    'quantity' => ['nullable', 'integer', 'min:1', 'max:'.config('shop.max_quantity')],
+]);
+
+$product = Product::available()->findOrFail($data['product_id']);
+$newQuantity = $cart->quantityOf($product->id) + ($data['quantity'] ?? 1);
+
+if ($newQuantity > $product->stock) {
+    $message = "Stock insuffisant : il reste {$product->stock} exemplaire(s) de « {$product->designation} ».";</code></pre>
+    </figure>
+    <p>Le paramètre <code>Cart $cart</code> de la méthode est rempli par Laravel lui-même (<strong>injection de dépendance</strong>).
+        Quand le bouton est cliqué, le script de <code class="file">public/js/app.js</code> envoie le formulaire avec <code>fetch</code> :
+        le contrôleur répond en JSON <code>{"message": …, "cartCount": 3}</code>, le bouton affiche « Ajouté », le compteur de l’en-tête se met
+        à jour et le message apparaît juste sous le bouton. Sans JavaScript, c’est une redirection classique avec message.</p>
+    <p>La page <code>/panier</code> appelle <code>Cart::summary()</code>, qui relit chaque produit et son prix <em>actuel</em> en base,
+        écarte les produits devenus indisponibles, signale ceux dont le stock est insuffisant, puis calcule sous-total, remise du client connecté
+        et total avec <code>PriceCalculator::totals()</code>. Modifier une quantité envoie <code>PATCH /panier/{product}</code> ; retirer une ligne
+        envoie <code>DELETE</code>. Les formulaires HTML ne connaissent que GET et POST, d’où la directive <code>@method</code> :</p>
+    <figure class="code" data-file="resources/views/cart/index.blade.php">
+        <figcaption><span>resources/views/cart/index.blade.php</span><span>Blade</span></figcaption>
+        <pre><code>&lt;form action="{{ route('cart.update', $product) }}" method="post" class="qty-form"&gt;
+    @csrf
+    @method('PATCH')</code></pre>
+    </figure>
+
+    <h3 class="step-title">Résultat</h3>
+    <figure class="shot"><img src="img/desktop-05-cart.png" alt="Page panier avec deux lignes, sélecteurs de quantité, récapitulatif sous-total, remise 10 % et total" loading="lazy">
+        <figcaption>Le panier de Khadija (remise 10 %) : sous-total, remise et total calculés par le serveur.</figcaption></figure>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Quantité supérieure au stock : « Stock insuffisant : il reste 2 exemplaire(s) de « Étiqueteuse portable ». » (réponse 422 pour le script).</li>
+        <li>Produit masqué ou archivé : <code>findOrFail</code> répond 404 ; s’il disparaît après l’ajout, il est retiré du résumé.</li>
+        <li>Le stock baisse pendant que l’article attend dans le panier : la ligne est signalée en rouge et le bouton « Passer la commande » est désactivé.</li>
+        <li>Visiteur : bouton « Se connecter pour commander » ; administrateur : « Les comptes administrateurs ne peuvent pas commander ».</li>
+    </ul>
+    <div class="callout try"><strong>À essayer</strong><p>Sur <code>/produits/Pr-000015</code> (étiqueteuse, stock 2), choisissez 3 avec le bouton + :
+        le message d’erreur s’affiche sous le bouton, le panier ne change pas.</p></div>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Session et message flash</strong> : <code>session([...])</code> garde une valeur entre les pages ; <code>->with('success', …)</code> garde un message pour la page suivante seulement.</li>
+        <li><strong>Usurpation de méthode</strong> (<em>method spoofing</em>) : <code>@method('PATCH')</code> ajoute un champ caché <code>_method</code>.</li>
+        <li><strong>Jeton CSRF</strong> : <code>@csrf</code> ajoute un champ caché que Laravel compare à la session ; sans lui, réponse 419 « Session expirée ».</li>
+        <li><strong>Ne jamais faire confiance au navigateur</strong> : le prix est toujours relu en base (règle 5 du PDF).</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch11">
+    <h2 id="ch11">11. Passer commande</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Dans le panier, le bouton <strong>Passer la commande</strong> ouvre <code>/commande</code> : les articles, l’adresse, le choix
+        « À la livraison » (LIV) ou « À 30 jours » (T30), et le bouton <strong>Confirmer la commande</strong>.</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd><span class="badge get">GET</span> <code>/commande</code> (<code class="route">checkout.create</code>) ·
+            <span class="badge post">POST</span> <code>/commande</code> (<code class="route">checkout.store</code>), réservées aux clients</dd>
+        <dt>Contrôleur</dt><dd><code class="action">CheckoutController@create</code>, <code class="action">CheckoutController@store</code></dd>
+        <dt>Service</dt><dd><code class="action">OrderService@placeOrder</code>, <code class="file">app/Services/PriceCalculator.php</code>, exception <code class="file">app/Exceptions/CheckoutException.php</code></dd>
+        <dt>Modèles</dt><dd><code class="file">app/Models/Order.php</code>, <code class="file">app/Models/OrderLine.php</code>, <code class="file">app/Models/Product.php</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/checkout/create.blade.php</code>, puis <code class="file">resources/views/orders/show.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p><code class="action">CheckoutController@create</code> renvoie au panier s’il est vide, sinon affiche le récapitulatif et place dans le
+        formulaire un <strong>jeton unique</strong> (<code>Str::uuid()</code>) dans le champ caché <code>checkout_token</code>. À l’envoi,
+        <code class="action">CheckoutController@store</code> valide les deux champs puis confie tout le travail au service :</p>
+    <figure class="code" data-file="app/Http/Controllers/CheckoutController.php">
+        <figcaption><span>app/Http/Controllers/CheckoutController.php</span><span>PHP</span></figcaption>
+        <pre><code>$data = $request->validate([
+    'payment_terms' => ['required', Rule::in(array_keys(Order::PAYMENT_TERMS))],
+    'checkout_token' => ['required', 'uuid'],
+], [
+    'payment_terms.required' => 'Choisissez une condition de paiement.',
+]);</code></pre>
+    </figure>
+    <p><code class="action">OrderService@placeOrder</code> travaille dans une <strong>transaction</strong> : si une étape échoue, rien n’est
+        enregistré.</p>
+    <ol class="flow">
+        <li><strong>Double envoi ?</strong> Une commande existe déjà avec ce jeton : on la renvoie, sans en créer une seconde.</li>
+        <li><strong>Relire les produits</strong> en base (<code>lockForUpdate()</code> bloque les autres commandes simultanées sous MySQL).</li>
+        <li><strong>Vérifier chaque ligne</strong> : produit encore disponible, quantité ≤ stock. Sinon, <code>CheckoutException</code> avec la liste des problèmes.</li>
+        <li><strong>Calculer</strong> les montants côté serveur avec la remise <em>actuelle</em> du client (<code>$client->fresh()</code>).</li>
+        <li><strong>Créer la commande</strong> (son numéro Com-0000xx est généré) puis ses lignes, avec les prix <em>figés</em>.</li>
+        <li><strong>Retirer le stock</strong> avec une condition vérifiée par la base elle-même : <code>where('stock', '>=', quantité)</code>.</li>
+    </ol>
+    <figure class="code" data-file="app/Services/OrderService.php">
+        <figcaption><span>app/Services/OrderService.php</span><span>PHP</span></figcaption>
+        <pre><code>foreach ($cartItems as $productId => $quantity) {
+    $product = $products->get($productId);
+
+    if (! $product || ! $product->isPurchasable()) {
+        $errors[] = 'Un produit de votre panier n’est plus disponible.';
+    } elseif ($quantity > $product->stock) {
+        $errors[] = "Stock insuffisant pour « {$product->designation} » (disponible : {$product->stock}).";
+    } else {
+        $lines[] = [
+            'product_id' => $product->id,
+            'quantity' => $quantity,
+            'unit_price' => $product->unit_price, // price frozen now
+        ];
+    }
+}</code></pre>
+    </figure>
+    <figure class="code" data-file="app/Services/OrderService.php">
+        <figcaption><span>app/Services/OrderService.php</span><span>PHP</span></figcaption>
+        <pre><code>// "where stock >= quantity" = a final safety check done by the database itself.
+$updated = Product::whereKey($line['product_id'])
+    ->where('stock', '>=', $line['quantity'])
+    ->decrement('stock', $line['quantity']);
+
+if ($updated === 0) {
+    throw new CheckoutException(['Le stock a changé pendant la commande. Veuillez réessayer.']);
+}</code></pre>
+    </figure>
+    <p>Enfin le contrôleur vide le panier et redirige vers la page de la commande avec la valeur flash <code>just_ordered</code>, qui fait
+        apparaître le grand encadré de confirmation.</p>
+
+    <h3 id="exemple-commande">Exemple complet : deux articles et une remise de 10 %</h3>
+    <p>Connectée avec <code>client@larashop.test</code> (remise 10 %), Khadija ajoute 3 ramettes A4 (Pr-000001, 49,90 DH) et
+        2 boîtes de stylos (Pr-000017, 65,00 DH), choisit « À la livraison » et confirme.</p>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Étape</th><th>Calcul (en centimes, sans virgule flottante)</th><th>Résultat</th></tr></thead>
+        <tbody>
+        <tr><td>Ligne 1</td><td>4 990 × 3 = 14 970</td><td>149,70 DH</td></tr>
+        <tr><td>Ligne 2</td><td>6 500 × 2 = 13 000</td><td>130,00 DH</td></tr>
+        <tr><td>Sous-total</td><td>14 970 + 13 000 = 27 970</td><td>279,70 DH</td></tr>
+        <tr><td>Remise 10 %</td><td>(27 970 × 10 + 50) ÷ 100, partie entière = 2 797</td><td>27,97 DH</td></tr>
+        <tr><td>Total</td><td>27 970 − 2 797 = 25 173</td><td><strong>251,73 DH</strong></td></tr>
+        <tr><td>Stock</td><td>ramettes 120 → 117 ; stylos 70 → 68</td><td>commande Com-000018 « En attente »</td></tr>
+        </tbody>
+    </table></div>
+    <figure class="code" data-file="app/Services/PriceCalculator.php">
+        <figcaption><span>app/Services/PriceCalculator.php</span><span>PHP</span></figcaption>
+        <pre><code>/** Discount in centimes, rounded half up. */
+public static function discount(int $subtotalCents, int $rate): int
+{
+    return intdiv($subtotalCents * $rate + 50, 100);
+}</code></pre>
+    </figure>
+    <p>Les montants sont stockés en <code>DECIMAL(10,2)</code> et calculés en <strong>centimes entiers</strong> : on évite ainsi les erreurs
+        des nombres à virgule (0,1 + 0,2 ≠ 0,3 en informatique). La remise est arrondie au centime le plus proche, la moitié vers le haut.</p>
+
+    <h3 id="prix-historiques">Prix historiques</h3>
+    <p>La commande enregistre <code>unit_price</code> sur chaque ligne et <code>discount_rate</code>, <code>subtotal</code>,
+        <code>discount_amount</code>, <code>total</code> sur la commande. Si l’administrateur change ensuite le prix ou la remise, les anciennes
+        commandes ne bougent pas. Les données de démonstration le montrent : dans <code class="file">database/seeders/OrderSeeder.php</code>,
+        la commande Com-000001 contient des ramettes à 45,00 DH alors que le catalogue affiche 49,90 DH.</p>
+
+    <h3 id="double-envoi">Envois répétés (double clic)</h3>
+    <ul>
+        <li>Dans le navigateur, le script désactive le bouton dès le premier clic et affiche « Commande en cours… ».</li>
+        <li>Côté serveur, le même jeton renvoie la commande déjà créée (étape 1 ci-dessus).</li>
+        <li>Si deux envois arrivent exactement en même temps, l’index unique de <code>orders.checkout_token</code> fait échouer le second ;
+            le service attrape l’erreur <code>UniqueConstraintViolationException</code> et renvoie la commande gagnante.</li>
+    </ul>
+
+    <h3 class="step-title">Résultat</h3>
+    <figure class="shot"><img src="img/desktop-08-confirmation.png" alt="Encadré vert « Merci, votre commande est confirmée » avec le numéro de commande, puis le détail de la commande" loading="lazy">
+        <figcaption>Confirmation avec le numéro de commande, le suivi et les articles aux prix figés.</figcaption></figure>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Aucune condition de paiement choisie : « Choisissez une condition de paiement. » sous les deux choix (aucune n’est cochée par défaut).</li>
+        <li>Stock insuffisant ou produit retiré entre-temps : retour au panier avec le message ; la transaction a tout annulé, le stock est intact.</li>
+        <li>Panier vide : <code>/commande</code> redirige vers le panier.</li>
+        <li>Visiteur : redirection vers <code>/connexion</code>, puis retour automatique sur <code>/commande</code> après connexion.</li>
+    </ul>
+    <figure class="shot"><img src="img/desktop-07-checkout-error.png" alt="Page de commande avec le message d’erreur sous les choix de paiement" loading="lazy">
+        <figcaption>Message d’erreur placé sous le choix de paiement, résumé cliquable en haut.</figcaption></figure>
+    <div class="callout try"><strong>À essayer</strong><p>Mettez 2 étiqueteuses (stock 2) dans le panier. Dans un autre onglet connecté en
+        administrateur, passez le stock à 1. Confirmez la commande : « Stock insuffisant pour « Étiqueteuse portable » (disponible : 1). »,
+        et aucune commande n’est créée.</p></div>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Transaction</strong> : <code>DB::transaction(function () { … })</code> valide tout à la fin, ou annule tout si une exception est lancée.</li>
+        <li><strong>Exception</strong> : <code>CheckoutException</code> interrompt le traitement ; le contrôleur l’attrape avec <code>try / catch</code>.</li>
+        <li><strong>Service</strong> : une classe qui contient une logique métier réutilisable, hors du contrôleur.</li>
+        <li><strong>Validation <code>Rule::in</code></strong> : seule une valeur de la liste <code>Order::PAYMENT_TERMS</code> est acceptée.</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch12">
+    <h2 id="ch12">12. Mes commandes : historique, statuts, annulation et PDF</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Menu <strong>Mon compte → Mes commandes</strong> ou l’onglet du même nom. Sur une commande : <strong>Télécharger le PDF</strong>,
+        <strong>Imprimer</strong>, et <strong>Annuler la commande</strong> tant qu’elle est en attente.</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd><span class="badge get">GET</span> <code>/mes-commandes</code> (<code class="route">orders.index</code>) ·
+            <span class="badge get">GET</span> <code>/mes-commandes/{order:number}</code> (<code class="route">orders.show</code>) ·
+            <span class="badge get">GET</span> <code>…/imprimer</code> (<code class="route">orders.print</code>) ·
+            <span class="badge get">GET</span> <code>…/pdf</code> (<code class="route">orders.pdf</code>) ·
+            <span class="badge post">POST</span> <code>…/annuler</code> (<code class="route">orders.cancel</code>)</dd>
+        <dt>Contrôleur</dt><dd><code class="action">OrderController@index</code>, <code class="action">OrderController@show</code>, <code class="action">OrderController@print</code>, <code class="action">OrderController@pdf</code>, <code class="action">OrderController@cancel</code></dd>
+        <dt>Autorisation</dt><dd><code class="file">app/Policies/OrderPolicy.php</code> (méthodes <code>view</code> et <code>cancel</code>)</dd>
+        <dt>Service</dt><dd><code class="action">OrderService@changeStatus</code>, <code class="file">app/Support/PdfExport.php</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/orders/index.blade.php</code>, <code class="file">resources/views/orders/show.blade.php</code>,
+            <code class="file">resources/views/orders/_tracking.blade.php</code>, <code class="file">resources/views/orders/_lines.blade.php</code>,
+            <code class="file">resources/views/orders/print.blade.php</code>, <code class="file">resources/views/pdf/order.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p>La liste ne lit que les commandes du client connecté : <code>Order::where('client_id', $request->user()->client_id)</code>, 10 par page.
+        L’adresse d’une commande utilise son numéro (<code>{order:number}</code>), mais le numéro seul ne suffit pas pour la voir :
+        le contrôleur demande l’autorisation à la <strong>policy</strong>.</p>
+    <figure class="code" data-file="app/Policies/OrderPolicy.php">
+        <figcaption><span>app/Policies/OrderPolicy.php</span><span>PHP</span></figcaption>
+        <pre><code>/** Admins see every order; a customer only sees the orders of their client. */
+public function view(User $user, Order $order): bool
+{
+    return $user->isAdmin() || ($user->client_id !== null &amp;&amp; $user->client_id === $order->client_id);
+}</code></pre>
+    </figure>
+    <figure class="code" data-file="app/Http/Controllers/OrderController.php">
+        <figcaption><span>app/Http/Controllers/OrderController.php</span><span>PHP</span></figcaption>
+        <pre><code>public function show(Order $order)
+{
+    // OrderPolicy::view -> 403 if this order belongs to another client.
+    Gate::authorize('view', $order);</code></pre>
+    </figure>
+    <p>Les statuts et leurs enchaînements possibles sont des constantes du modèle <code class="file">app/Models/Order.php</code> :</p>
+    <figure class="code" data-file="app/Models/Order.php">
+        <figcaption><span>app/Models/Order.php</span><span>PHP</span></figcaption>
+        <pre><code>public const NEXT_STATUSES = [
+    'pending' => ['preparing', 'cancelled'],
+    'preparing' => ['shipped', 'cancelled'],
+    'shipped' => ['delivered'],
+    'delivered' => [],
+    'cancelled' => [],
+];</code></pre>
+    </figure>
+    <p>Le suivi (<code class="file">resources/views/orders/_tracking.blade.php</code>) colore les étapes En attente → En préparation →
+        Expédiée → Livrée. Le client peut annuler une commande <em>en attente</em> (<code>OrderPolicy::cancel</code>) : le service passe le
+        statut à « Annulée » et remet les quantités en stock, une seule fois (voir le <a href="admin.html#ch18">chapitre 18</a>).
+        Le PDF est fabriqué par dompdf à partir de <code class="file">resources/views/pdf/order.blade.php</code> ; la page « Imprimer »
+        est une page HTML que le navigateur peut aussi enregistrer en PDF.</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <figure class="shot"><img src="img/desktop-10-orders.png" alt="Liste « Mes commandes » avec numéros, dates, conditions de paiement, totaux et statuts" loading="lazy">
+        <figcaption><code>/mes-commandes</code>, avec les boutons de téléchargement CSV, Excel et PDF.</figcaption></figure>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Ouvrir la commande d’un autre client en tapant son adresse : 403 « Accès refusé ».</li>
+        <li>Annuler une commande déjà en préparation : le bouton n’apparaît pas et l’URL répond 403.</li>
+        <li>Aucune commande : « Aucune commande pour le moment » et un lien vers le catalogue.</li>
+    </ul>
+    <div class="callout try"><strong>À essayer</strong><p>Connecté avec <code>client@larashop.test</code>, ouvrez
+        <code>/mes-commandes/Com-000004</code> (commande de Youssef) : la page 403 s’affiche. Le test
+        <code>test_customer_cannot_open_another_customers_order_by_url</code> de <code class="file">tests/Feature/AuthorizationTest.php</code>
+        vérifie la même chose.</p></div>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Policy</strong> : classe qui répond à « cet utilisateur a-t-il le droit de … sur cet objet ? ». Laravel associe automatiquement <code>OrderPolicy</code> au modèle <code>Order</code>.</li>
+        <li><strong><code>Gate::authorize()</code></strong> : appelle la policy et répond 403 si la réponse est non ; dans les vues, <code>@can('cancel', $order)</code> affiche le bouton seulement si c’est permis.</li>
+        <li><strong>Liaison de modèle par une autre colonne</strong> : <code>{order:number}</code>.</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch13">
+    <h2 id="ch13">13. Mes données : les téléchargements du client</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Menu <strong>Mon compte → Mes données</strong> (<code>/mes-donnees</code>) : un encadré « Toutes mes données » (Rapport PDF, Classeur
+        Excel, Archive CSV) et, pour chaque jeu de données, trois boutons CSV · Excel · PDF.</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd><span class="badge get">GET</span> <code>/mes-donnees</code> (<code class="route">my-data.index</code>) ·
+            <code>/mes-donnees/{dataset}.{format}</code> (<code class="route">my-data.download</code>) ·
+            <code>/mes-donnees/archive.zip</code> (<code class="route">my-data.bundle</code>) ·
+            <code>/mes-donnees/classeur.xlsx</code> (<code class="route">my-data.workbook</code>) ·
+            <code>/mes-donnees/rapport.pdf</code> (<code class="route">my-data.report</code>)</dd>
+        <dt>Contrôleur</dt><dd><code class="action">AccountDataController@download</code>, <code class="action">AccountDataController@bundle</code>, <code class="action">AccountDataController@workbook</code>, <code class="action">AccountDataController@report</code></dd>
+        <dt>Exports</dt><dd><code class="file">app/Support/ExportDatasets.php</code> (colonnes), <code class="file">app/Support/CsvExport.php</code>, <code class="file">app/Support/XlsxExport.php</code>, <code class="file">app/Support/PdfExport.php</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/my-data/index.blade.php</code>, <code class="file">resources/views/components/export-formats.blade.php</code>, <code class="file">resources/views/pdf/report.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p>Quatre jeux de données sont proposés : <code>profil</code>, <code>commandes</code>, <code>lignes-commande</code>, <code>favoris</code>.
+        La propriété des données est garantie par les requêtes elles-mêmes : chacune est limitée au client ou au compte connecté.</p>
+    <figure class="code" data-file="app/Http/Controllers/AccountDataController.php">
+        <figcaption><span>app/Http/Controllers/AccountDataController.php</span><span>PHP</span></figcaption>
+        <pre><code>return match ($key) {
+    'profil' => ExportDatasets::profile($user),
+    'favoris' => ExportDatasets::favorites(ExportDatasets::favoritesQuery($user->id)),
+    'commandes' => ExportDatasets::orders(Order::where('client_id', $user->client_id)),
+    'lignes-commande' => ExportDatasets::orderLines(
+        OrderLine::whereHas('order', fn ($q) => $q->where('client_id', $user->client_id))
+    ),
+};</code></pre>
+    </figure>
+    <p>Les colonnes de chaque fichier sont définies une seule fois dans <code class="file">app/Support/ExportDatasets.php</code> et servent aux
+        trois formats ainsi qu’aux exports de l’administrateur. Le fichier CSV est écrit avec <code>fputcsv</code> : marque UTF-8 (BOM) pour
+        qu’Excel reconnaisse les accents, séparateur <code>;</code> et virgule décimale (12,50) pour Excel en français. Le détail est au
+        <a href="admin.html#ch19">chapitre 19</a>.</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <figure class="shot"><img src="img/desktop-09-my-data.png" alt="Page Mes données avec les compteurs, l’encadré Toutes mes données et la liste des fichiers séparés" loading="lazy">
+        <figcaption>Le navigateur télécharge par exemple <code>mes-donnees-commandes.xlsx</code> ou <code>mes-donnees-lara-shop.zip</code>.</figcaption></figure>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Jeu de données ou format inconnu (<code>/mes-donnees/inconnu.csv</code>, <code>/mes-donnees/commandes.docx</code>) : 404.</li>
+        <li>Visiteur : redirection vers la connexion ; administrateur : 403 (il dispose des exports complets).</li>
+        <li>Les mots de passe, jetons et sessions ne sont jamais sélectionnés : les tests de <code class="file">tests/Feature/ExportTest.php</code> vérifient
+            qu’aucun hachage <code>$2y$</code> n’apparaît dans les fichiers.</li>
+    </ul>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Contrainte de route</strong> : <code>->whereIn('format', ['csv', 'xlsx', 'pdf'])</code> limite les valeurs acceptées du paramètre.</li>
+        <li><strong>Réponse en flux</strong> (<code>response()->streamDownload()</code>) : le fichier est écrit au fur et à mesure, sans le garder en mémoire.</li>
+        <li><strong>Limiter la requête au propriétaire</strong> : plus sûr que de vérifier après coup, car une autre donnée ne peut tout simplement pas être lue.</li>
+    </ul>
+    </section>
+
+    <nav class="chapter-nav" aria-label="Pages du guide">
+        <a href="index.html">← Partie 1 : prise en main</a>
+        <a href="admin.html">Partie 3 : l’administration →</a>
+    </nav>
+    <footer class="doc-footer">Guide écrit à partir du code de ce dossier. Les extraits sont copiés depuis les fichiers indiqués.</footer>
+</main>
+</div>
+</body>
+</html>

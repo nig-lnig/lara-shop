@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Guide Lara-Shop · L’administration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#contenu">Aller au contenu</a>
+<div class="layout">
+<!--NAV:admin-->
+<nav class="toc" aria-label="Sommaire du guide">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">L</span> Guide Lara-Shop</a>
+<details open><summary>Sommaire</summary>
+<h2>Partie 1 · Prise en main</h2><ol>
+<li><a href="index.html#ch1"><span class="num">1.</span>Ce que fait l’application</a></li>
+<li><a href="index.html#ch2"><span class="num">2.</span>Lancer le projet</a></li>
+<li><a href="index.html#ch3"><span class="num">3.</span>Se repérer dans les dossiers</a></li>
+<li><a href="index.html#ch4"><span class="num">4.</span>Le modèle de données</a></li>
+<li><a href="index.html#ch5"><span class="num">5.</span>Le parcours d’une requête</a></li>
+</ol>
+<h2>Partie 2 · La boutique</h2><ol>
+<li><a href="boutique.html#ch6"><span class="num">6.</span>Inscription, connexion, profil</a></li>
+<li><a href="boutique.html#ch7"><span class="num">7.</span>Catalogue et fiche produit</a></li>
+<li><a href="boutique.html#ch8"><span class="num">8.</span>Recherche, filtres, tri</a></li>
+<li><a href="boutique.html#ch9"><span class="num">9.</span>Favoris</a></li>
+<li><a href="boutique.html#ch10"><span class="num">10.</span>Panier</a></li>
+<li><a href="boutique.html#ch11"><span class="num">11.</span>Passer commande</a></li>
+<li><a href="boutique.html#ch12"><span class="num">12.</span>Mes commandes et statuts</a></li>
+<li><a href="boutique.html#ch13"><span class="num">13.</span>Mes données</a></li>
+</ol>
+<h2>Partie 3 · L’administration</h2><ol>
+<li><a href="#ch14"><span class="num">14.</span>Tableau de bord</a></li>
+<li><a href="#ch15"><span class="num">15.</span>Clients (CRUD)</a></li>
+<li><a href="#ch16"><span class="num">16.</span>Fournisseurs (CRUD)</a></li>
+<li><a href="#ch17"><span class="num">17.</span>Produits, images, stock</a></li>
+<li><a href="#ch18"><span class="num">18.</span>Commandes (admin)</a></li>
+<li><a href="#ch19"><span class="num">19.</span>Exports CSV, Excel, PDF</a></li>
+</ol>
+<h2>Partie 4 · Références</h2><ol>
+<li><a href="reference.html#ch20"><span class="num">20.</span>Notions Laravel</a></li>
+<li><a href="reference.html#ch21"><span class="num">21.</span>Interface et JavaScript</a></li>
+<li><a href="reference.html#ch22"><span class="num">22.</span>Tests automatisés</a></li>
+<li><a href="reference.html#ch23"><span class="num">23.</span>Écarts observés</a></li>
+<li><a href="reference.html#ch24"><span class="num">24.</span>Glossaire</a></li>
+<li><a href="reference.html#ch25"><span class="num">25.</span>Routes et fonctionnalités</a></li>
+</ol>
+</details></nav>
+<!--/NAV-->
+
+<main id="contenu">
+    <p class="eyebrow">Partie 3</p>
+    <h1>L’administration</h1>
+    <p class="lead">Connectez-vous avec <code>admin@larashop.test</code> / <code>password</code> : vous arrivez sur <code>/admin</code>.
+        Toutes les routes de cette partie sont regroupées dans <code class="file">routes/web.php</code> sous un même préfixe, un même
+        début de nom et les mêmes middlewares :</p>
+    <figure class="code" data-file="routes/web.php">
+        <figcaption><span>routes/web.php</span><span>PHP</span></figcaption>
+        <pre><code>Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('clients', Admin\ClientController::class)->except('show');</code></pre>
+    </figure>
+    <p>Le middleware <code>admin</code> est la classe <code class="file">app/Http/Middleware/EnsureUserIsAdmin.php</code>, déclarée sous ce nom
+        court dans <code class="file">bootstrap/app.php</code> :</p>
+    <figure class="code" data-file="app/Http/Middleware/EnsureUserIsAdmin.php">
+        <figcaption><span>app/Http/Middleware/EnsureUserIsAdmin.php</span><span>PHP</span></figcaption>
+        <pre><code>public function handle(Request $request, Closure $next): Response
+{
+    abort_unless($request->user()?->isAdmin(), 403, 'Accès réservé aux administrateurs.');
+
+    return $next($request);
+}</code></pre>
+    </figure>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch14">
+    <h2 id="ch14">14. Le tableau de bord</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>La connexion d’un administrateur, ou le lien « Tableau de bord » de la barre latérale (<code class="file">resources/views/layouts/admin.blade.php</code>).</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Route</dt><dd><span class="badge get">GET</span> <code>/admin</code> (<code class="route">admin.dashboard</code>)</dd>
+        <dt>Contrôleur</dt><dd><code class="action">DashboardController@index</code></dd>
+        <dt>Vue</dt><dd><code class="file">resources/views/admin/dashboard.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <figure class="code" data-file="app/Http/Controllers/Admin/DashboardController.php">
+        <figcaption><span>app/Http/Controllers/Admin/DashboardController.php</span><span>PHP</span></figcaption>
+        <pre><code>$stats = [
+    'clients' => Client::whereNull('archived_at')->count(),
+    'suppliers' => Supplier::whereNull('archived_at')->count(),
+    'products' => Product::available()->count(),
+    'orders' => Order::count(),
+    'pending' => Order::where('status', 'pending')->count(),
+    // Revenue of non-cancelled orders (SUM on DECIMAL columns stays exact in SQL).
+    'revenue' => Order::where('status', '!=', 'cancelled')->sum('total'),
+];</code></pre>
+    </figure>
+    <p>Le contrôleur charge aussi les 8 commandes les plus récentes et les 10 produits en <strong>stock faible</strong>. Un produit est en
+        stock faible quand son stock est inférieur ou égal à son seuil d’alerte ; la comparaison de deux colonnes se fait avec <code>whereColumn</code> :</p>
+    <figure class="code" data-file="app/Models/Product.php">
+        <figcaption><span>app/Models/Product.php</span><span>PHP</span></figcaption>
+        <pre><code>public function scopeLowStock(Builder $query): Builder
+{
+    return $query->whereColumn('stock', '&lt;=', 'low_stock_threshold');
+}</code></pre>
+    </figure>
+
+    <h3 class="step-title">Résultat</h3>
+    <figure class="shot"><img src="img/desktop-20-dashboard.png" alt="Tableau de bord : compteurs, commandes récentes et liste des produits en stock faible" loading="lazy">
+        <figcaption>Compteurs cliquables, commandes récentes et alerte de stock faible.</figcaption></figure>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Un client qui tape <code>/admin</code> reçoit la page 403 « Accès réservé aux administrateurs. » ; un visiteur est envoyé sur <code>/connexion</code>.</li>
+        <li>Aucun produit sous son seuil : « Aucun produit sous son seuil d’alerte. »</li>
+    </ul>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Groupe de routes</strong> : <code>prefix('admin')</code> ajoute <code>/admin</code> aux adresses, <code>name('admin.')</code> préfixe les noms, <code>middleware([...])</code> protège tout le groupe.</li>
+        <li><strong>Agrégats</strong> : <code>count()</code> et <code>sum()</code> sont calculés par la base, pas en PHP.</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch15">
+    <h2 id="ch15">15. Les clients (CRUD)</h2>
+    <p><strong>CRUD</strong> signifie Create, Read, Update, Delete : créer, lire, modifier, supprimer. Laravel fournit les sept routes
+        d’un CRUD en une ligne avec <code>Route::resource()</code> (ici sans la page « show », inutile).</p>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Action</th><th>Méthode et adresse</th><th>Nom de route</th><th>Méthode du contrôleur</th></tr></thead>
+        <tbody>
+        <tr><td>Lister</td><td><span class="badge get">GET</span> <code>/admin/clients</code></td><td><code class="route">admin.clients.index</code></td><td><code class="action">ClientController@index</code></td></tr>
+        <tr><td>Formulaire de création</td><td><span class="badge get">GET</span> <code>/admin/clients/create</code></td><td><code class="route">admin.clients.create</code></td><td><code class="action">ClientController@create</code></td></tr>
+        <tr><td>Enregistrer</td><td><span class="badge post">POST</span> <code>/admin/clients</code></td><td><code class="route">admin.clients.store</code></td><td><code class="action">ClientController@store</code></td></tr>
+        <tr><td>Formulaire de modification</td><td><span class="badge get">GET</span> <code>/admin/clients/{client}/edit</code></td><td><code class="route">admin.clients.edit</code></td><td><code class="action">ClientController@edit</code></td></tr>
+        <tr><td>Mettre à jour</td><td><span class="badge put">PUT</span> <code>/admin/clients/{client}</code></td><td><code class="route">admin.clients.update</code></td><td><code class="action">ClientController@update</code></td></tr>
+        <tr><td>Supprimer ou archiver</td><td><span class="badge delete">DELETE</span> <code>/admin/clients/{client}</code></td><td><code class="route">admin.clients.destroy</code></td><td><code class="action">ClientController@destroy</code></td></tr>
+        <tr><td>Restaurer (ajout)</td><td><span class="badge patch">PATCH</span> <code>/admin/clients/{client}/restaurer</code></td><td><code class="route">admin.clients.restore</code></td><td><code class="action">ClientController@restore</code></td></tr>
+        </tbody>
+    </table></div>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Barre latérale → <strong>Clients</strong>. Bouton « + Nouveau client », boutons « Modifier » et « Supprimer » sur chaque ligne,
+        « Restaurer » sur les clients archivés.</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Contrôleur</dt><dd><code class="file">app/Http/Controllers/Admin/ClientController.php</code></dd>
+        <dt>Validation</dt><dd><code class="file">app/Http/Requests/ClientRequest.php</code></dd>
+        <dt>Modèle</dt><dd><code class="file">app/Models/Client.php</code> (portée <code>filter()</code>, constante <code>TYPES</code>), trait <code class="file">app/Models/Concerns/Archivable.php</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/admin/clients/index.blade.php</code>, <code class="file">resources/views/admin/clients/form.blade.php</code>
+            (un seul formulaire pour créer et modifier), <code class="file">resources/views/admin/_row-actions.blade.php</code>,
+            <code class="file">resources/views/admin/_archive-filter.blade.php</code>, <code class="file">resources/views/admin/_table-toolbar.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p><strong>Liste.</strong> Les filtres de l’adresse (<code>q</code>, <code>type</code>, <code>archived</code>) sont lus par une méthode
+        commune à tous les contrôleurs, qui ne garde que des textes :</p>
+    <figure class="code" data-file="app/Http/Controllers/Controller.php">
+        <figcaption><span>app/Http/Controllers/Controller.php</span><span>PHP</span></figcaption>
+        <pre><code>protected function filters(Request $request, array $keys): array
+{
+    $filters = [];
+    foreach ($keys as $key) {
+        $value = $request->query($key);
+        if (is_string($value) &amp;&amp; trim($value) !== '') {
+            $filters[$key] = mb_substr(trim($value), 0, 100);
+        }
+    }
+
+    return $filters;
+}</code></pre>
+    </figure>
+    <p><strong>Création et modification.</strong> La validation est déplacée dans une <strong>Form Request</strong> : Laravel l’exécute avant
+        d’entrer dans la méthode du contrôleur, qui reçoit des données déjà propres avec <code>$request->validated()</code>.</p>
+    <figure class="code" data-file="app/Http/Requests/ClientRequest.php">
+        <figcaption><span>app/Http/Requests/ClientRequest.php</span><span>PHP</span></figcaption>
+        <pre><code>public function rules(): array
+{
+    return [
+        'name' => ['required', 'string', 'max:120'],
+        'street' => ['required', 'string', 'max:190'],
+        'postal_code' => ['required', 'string', 'max:10', 'regex:/^[0-9A-Za-z \-]+$/'],
+        'city' => ['required', 'string', 'max:100'],
+        'type' => ['required', Rule::in(array_keys(Client::TYPES))],
+        'special_discount' => ['required', 'integer', 'between:0,100'],
+    ];
+}</code></pre>
+    </figure>
+    <p>Le code Cli-0000xx est fabriqué automatiquement (<a href="index.html#cles">chapitre 4</a>). Changer la remise n’affecte que les
+        <em>prochaines</em> commandes : les anciennes gardent leur <code>discount_rate</code>.</p>
+    <h4 id="archivage">Supprimer ou archiver ?</h4>
+    <p>Supprimer un client qui a des commandes casserait l’historique (les commandes pointeraient vers rien ; la clé étrangère
+        <code>restrictOnDelete()</code> l’interdit d’ailleurs). Le contrôleur archive donc au lieu de supprimer :</p>
+    <figure class="code" data-file="app/Http/Controllers/Admin/ClientController.php">
+        <figcaption><span>app/Http/Controllers/Admin/ClientController.php</span><span>PHP</span></figcaption>
+        <pre><code>public function destroy(Client $client)
+{
+    if ($client->orders()->exists() || $client->user()->exists()) {
+        $client->archive();
+
+        return back()->with('success', "Client {$client->code} archivé (il possède un historique, il n’a pas été supprimé).");
+    }
+
+    $client->delete();
+
+    return back()->with('success', "Client {$client->code} supprimé.");
+}</code></pre>
+    </figure>
+    <p><code>archive()</code> vient du trait <code class="file">app/Models/Concerns/Archivable.php</code>, partagé par les clients, fournisseurs
+        et produits. Il remplit <code>archived_at</code> ; la portée <code>archiveState()</code> choisit ensuite d’afficher les actifs, les archivés ou tous.</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <p>Retour à la liste avec « Client Cli-000009 créé. », « … mis à jour. », « … archivé (il possède un historique…) » ou « … supprimé. ».</p>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Remise de 101 % ou type inconnu : message sous le champ, rien n’est enregistré.</li>
+        <li>Un client qui n’est pas administrateur ne peut pas envoyer ces formulaires : le middleware répond 403, et <code>ClientRequest::authorize()</code> vérifie aussi le rôle.</li>
+        <li>Comportement observé : un client archivé disparaît des listes mais son compte peut toujours se connecter (voir les <a href="reference.html#ch23">écarts</a>).</li>
+    </ul>
+    <div class="callout try"><strong>À essayer</strong><p>Supprimez Cli-000001 : il est archivé, pas supprimé. Choisissez « Archivés » dans le
+        filtre « Affichage », puis « Restaurer ».</p></div>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Contrôleur de ressource</strong> et <code>Route::resource()</code> : les sept actions CRUD aux noms standard (index, create, store, show, edit, update, destroy).</li>
+        <li><strong>Form Request</strong> : classe de validation (<code>authorize()</code>, <code>rules()</code>, <code>messages()</code>).</li>
+        <li><strong>Méthodes HTTP</strong> : PUT pour remplacer une fiche, DELETE pour supprimer, envoyées via <code>@method('PUT')</code> / <code>@method('DELETE')</code>.</li>
+        <li><strong>Trait</strong> : morceau de code PHP réutilisé par plusieurs classes (<code>use Archivable;</code>).</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch16">
+    <h2 id="ch16">16. Les fournisseurs (CRUD)</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Barre latérale → <strong>Fournisseurs</strong>. Le nombre de produits de chaque fournisseur est un lien vers la liste des produits filtrée.</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd><code>Route::resource('fournisseurs', …)->parameters(['fournisseurs' => 'supplier'])->names('suppliers')</code> :
+            adresses en français (<code>/admin/fournisseurs</code>), noms en anglais (<code class="route">admin.suppliers.index</code>,
+            <code class="route">admin.suppliers.store</code>…), plus <code class="route">admin.suppliers.restore</code></dd>
+        <dt>Contrôleur</dt><dd><code class="file">app/Http/Controllers/Admin/SupplierController.php</code> (règles de validation dans sa méthode privée <code>rules()</code>)</dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/admin/suppliers/index.blade.php</code>, <code class="file">resources/views/admin/suppliers/form.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p>Même principe que les clients, avec une validation plus courte écrite dans le contrôleur
+        (<code>$request->validate($this->rules())</code>). Règle 6 du PDF : chaque produit garde son fournisseur, donc un fournisseur qui
+        fournit encore des produits est archivé, jamais supprimé.</p>
+    <figure class="code" data-file="app/Http/Controllers/Admin/SupplierController.php">
+        <figcaption><span>app/Http/Controllers/Admin/SupplierController.php</span><span>PHP</span></figcaption>
+        <pre><code>if ($supplier->products()->exists()) {
+    $supplier->archive();</code></pre>
+    </figure>
+    <p>Un fournisseur archivé ne peut plus être choisi pour un produit : la règle
+        <code>Rule::exists('suppliers', 'id')->whereNull('archived_at')</code> de <code class="file">app/Http/Requests/ProductRequest.php</code> le refuse.</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <p>« Fournisseur Fr-000007 créé. », « … archivé (il fournit des produits, il n’a pas été supprimé). » ou « … supprimé. ».</p>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul><li>Nom ou ville vide : message sous le champ.</li><li>Un fournisseur sans produit est vraiment supprimé (test <code>test_unreferenced_records_are_really_deleted</code>).</li></ul>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul><li><strong>Personnaliser une ressource</strong> : <code>parameters()</code> renomme le paramètre de route, <code>names()</code> le préfixe des noms.</li>
+        <li><strong>Clé étrangère <code>restrictOnDelete()</code></strong> : la base elle-même refuse de supprimer un fournisseur encore utilisé.</li></ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch17">
+    <h2 id="ch17">17. Les produits : CRUD, images, visibilité et stock</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Barre latérale → <strong>Produits et stock</strong>. Filtres : recherche, famille, fournisseur, stock faible, visibilité en boutique,
+        archivage. Le formulaire contient le prix, la famille, le fournisseur, le stock et son seuil d’alerte, la photo et la case
+        <strong>Visible dans la boutique</strong>.</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd>ressource <code>/admin/produits</code> (<code class="route">admin.products.index</code>, <code class="route">admin.products.create</code>,
+            <code class="route">admin.products.store</code>, <code class="route">admin.products.edit</code>, <code class="route">admin.products.update</code>,
+            <code class="route">admin.products.destroy</code>) et <code class="route">admin.products.restore</code></dd>
+        <dt>Contrôleur</dt><dd><code class="file">app/Http/Controllers/Admin/ProductController.php</code></dd>
+        <dt>Validation</dt><dd><code class="file">app/Http/Requests/ProductRequest.php</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/admin/products/index.blade.php</code>, <code class="file">resources/views/admin/products/form.blade.php</code></dd>
+        <dt>Script</dt><dd><code class="file">public/js/app.js</code>, section 5b : aperçu de l’image avant l’enregistrement</dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p><strong>Préparer les données.</strong> Avant la validation, <code>prepareForValidation()</code> accepte un prix tapé à la française
+        (« 12,50 ») et transforme la case à cocher en vrai booléen (une case décochée n’envoie rien du tout) :</p>
+    <figure class="code" data-file="app/Http/Requests/ProductRequest.php">
+        <figcaption><span>app/Http/Requests/ProductRequest.php</span><span>PHP</span></figcaption>
+        <pre><code>// Accept "12,50" as well as "12.50" for the price.
+if (is_string($this->unit_price)) {
+    $this->merge(['unit_price' => str_replace(',', '.', trim($this->unit_price))]);
+}
+
+// An unchecked checkbox sends nothing: turn "absent" into false.
+$this->merge(['is_listed' => $this->boolean('is_listed')]);</code></pre>
+    </figure>
+    <p><strong>Image.</strong> Le formulaire a <code>enctype="multipart/form-data"</code>, indispensable pour envoyer un fichier. Le script
+        affiche la photo choisie avant l’envoi avec <code>URL.createObjectURL()</code> et refuse dès le navigateur un format ou un poids incorrect.
+        Le serveur vérifie de nouveau (JPG, PNG ou WebP, taille limitée par <code>upload_max_filesize</code> de PHP, 2 Mo sous WAMP) puis range le fichier :</p>
+    <figure class="code" data-file="app/Http/Controllers/Admin/ProductController.php">
+        <figcaption><span>app/Http/Controllers/Admin/ProductController.php</span><span>PHP</span></figcaption>
+        <pre><code>if ($request->hasFile('image')) {
+    $data['image_path'] = $request->file('image')->store('products', 'public');
+}</code></pre>
+    </figure>
+    <p>Le fichier part dans <code>storage/app/public/products</code> ; <code>Product::imageUrl()</code> construit son adresse avec
+        <code>asset('storage/'.$this->image_path)</code>, qui suit l’adresse réellement utilisée dans le navigateur. Remplacer ou retirer
+        l’image supprime l’ancien fichier.</p>
+    <figure class="shot"><img src="img/admin-image-preview.png" alt="Formulaire produit avec l’aperçu de la nouvelle image marqué « pas encore enregistré » et la case Visible dans la boutique" loading="lazy">
+        <figcaption>Aperçu de l’image avant l’enregistrement et case « Visible dans la boutique ».</figcaption></figure>
+    <p><strong>Visibilité.</strong> Décochée, la case met <code>is_listed</code> à faux : le produit sort de la portée <code>available()</code>,
+        donc du catalogue, de la recherche, du panier, des favoris et de la commande, mais reste dans l’administration et dans les commandes passées.</p>
+    <p><strong>Stock (inventaire).</strong> Le stock change à trois endroits : l’administrateur le corrige dans ce formulaire, une commande le
+        diminue (<a href="boutique.html#ch11">chapitre 11</a>), une annulation le rétablit (<a href="#ch18">chapitre 18</a>). Sous le seuil
+        d’alerte, la liste affiche « stock faible » et le produit apparaît sur le tableau de bord ; le filtre <code>?stock=low</code> les liste tous.</p>
+    <p><strong>Suppression.</strong> Un produit présent dans des lignes de commande est archivé ; sinon il est supprimé avec son image.</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <figure class="shot"><img src="img/desktop-24-products-low.png" alt="Liste des produits filtrée sur le stock faible avec badges orange et rouge" loading="lazy">
+        <figcaption><code>/admin/produits?stock=low</code> avec l’export de ces résultats au-dessus du tableau.</figcaption></figure>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Prix <code>1,999</code> : « Le prix doit être un nombre avec au plus 2 décimales (ex. 12,50). »</li>
+        <li>Image trop lourde ou au mauvais format : refusée dans le navigateur avant l’envoi, puis par le serveur s’il le faut.</li>
+        <li>Fournisseur archivé : refusé par la validation.</li>
+        <li>Lien <code>public/storage</code> absent : le formulaire affiche un avertissement demandant <code>php artisan storage:link</code>.</li>
+    </ul>
+    <div class="callout try"><strong>À essayer</strong><p>Décochez « Visible dans la boutique » sur Pr-000002, enregistrez, puis cherchez
+        « cahier » dans la boutique en navigation privée : le produit n’apparaît plus. Sa fiche répond 404.</p></div>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Envoi de fichier</strong> : <code>$request->file()</code>, <code>store()</code> et les disques de stockage (<code>public</code>).</li>
+        <li><strong>Lien symbolique</strong> <code>storage:link</code> : rend le dossier <code>storage/app/public</code> visible sous <code>public/storage</code>.</li>
+        <li><strong><code>prepareForValidation()</code></strong> : nettoyer les données avant de les valider.</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch18">
+    <h2 id="ch18">18. Les commandes côté administrateur</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <p>Barre latérale → <strong>Commandes</strong> : recherche (numéro, nom ou code client), filtres par statut, condition de paiement et
+        dates. Bouton « Détails » puis, dans l’encadré <strong>Statut</strong>, une liste des statuts possibles et « Mettre à jour ».</p>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd><span class="badge get">GET</span> <code>/admin/commandes</code> (<code class="route">admin.orders.index</code>) ·
+            <span class="badge get">GET</span> <code>/admin/commandes/{order:number}</code> (<code class="route">admin.orders.show</code>) ·
+            <span class="badge get">GET</span> <code>…/pdf</code> (<code class="route">admin.orders.pdf</code>) ·
+            <span class="badge patch">PATCH</span> <code>…/statut</code> (<code class="route">admin.orders.status</code>)</dd>
+        <dt>Contrôleur</dt><dd><code class="file">app/Http/Controllers/Admin/OrderController.php</code></dd>
+        <dt>Service</dt><dd><code class="action">OrderService@changeStatus</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/admin/orders/index.blade.php</code>, <code class="file">resources/views/admin/orders/show.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p>La liste utilise <code>Order::scopeFilter()</code>. Le formulaire de statut ne propose que les étapes suivantes autorisées
+        (<code>$order->nextStatuses()</code>, d’après <code>Order::NEXT_STATUSES</code>). Le contrôleur vérifie le droit, valide la valeur
+        et appelle le service, qui refuse les passages interdits et, pour une annulation, remet le stock <strong>une seule fois</strong> :</p>
+    <figure class="code" data-file="app/Services/OrderService.php">
+        <figcaption><span>app/Services/OrderService.php</span><span>PHP</span></figcaption>
+        <pre><code>if ($newStatus === 'cancelled') {
+    // Marks the order as "stock restored" only if it was not marked yet.
+    // update() returns the number of rows changed: 1 the first time, 0 after.
+    $firstTime = Order::whereKey($order->id)
+        ->whereNull('stock_restored_at')
+        ->update(['stock_restored_at' => now()]);
+
+    if ($firstTime === 1) {
+        foreach ($order->lines as $line) {
+            Product::whereKey($line->product_id)->increment('stock', $line->quantity);
+        }
+    }
+}</code></pre>
+    </figure>
+    <p>La confirmation « Statut mis à jour : … » s’affiche dans l’encadré Statut, à côté du formulaire utilisé (valeur flash
+        <code>status_updated</code>).</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <figure class="shot"><img src="img/desktop-22-order-status.png" alt="Détail d’une commande côté admin avec l’encadré Statut et le message Statut mis à jour" loading="lazy">
+        <figcaption>Détail d’une commande, lignes aux prix figés, PDF et changement de statut.</figcaption></figure>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Passage interdit (par exemple Livrée → Annulée) : le service lance une erreur de validation « Impossible de passer de … à … ».</li>
+        <li>Une commande Livrée ou Annulée est finale : « Statut final : aucune modification possible. »</li>
+        <li>Annuler deux fois (client puis admin, ou deux onglets) ne rend jamais le stock deux fois (test <code>test_cancelling_restores_stock_only_once</code>).</li>
+    </ul>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Machine à états</strong> simple : un tableau qui liste les étapes possibles après chaque statut.</li>
+        <li><strong>Mise à jour conditionnelle</strong> : <code>update()</code> renvoie le nombre de lignes modifiées, ce qui permet de savoir si on est le premier.</li>
+        <li><strong><code>ValidationException::withMessages()</code></strong> : produire une erreur de formulaire depuis un service.</li>
+    </ul>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="feature" aria-labelledby="ch19">
+    <h2 id="ch19">19. Les exports (CSV, Excel, PDF)</h2>
+
+    <h3 class="step-title">Point de départ</h3>
+    <ul>
+        <li>Au-dessus de chaque tableau de l’administration : « Exporter ces résultats » (ou « Exporter la liste ») en <strong>CSV</strong>,
+            <strong>Excel</strong> ou <strong>PDF</strong>, avec les filtres en cours.</li>
+        <li>Page <strong>Exports</strong> (<code>/admin/exports</code>) : chaque table entière, et l’<strong>Export complet de la boutique</strong>
+            (classeur Excel à 7 onglets ou archive ZIP de fichiers CSV).</li>
+    </ul>
+
+    <h3 class="step-title">Fichiers concernés</h3>
+    <dl class="files">
+        <dt>Routes</dt><dd><code>/admin/exports</code> (<code class="route">admin.exports.index</code>) ·
+            <code>/admin/exports/{dataset}.{format}</code> (<code class="route">admin.exports.download</code>) ·
+            <code>/admin/exports/lara-shop-export-complet.zip</code> (<code class="route">admin.exports.bundle</code>) ·
+            <code>/admin/exports/lara-shop-classeur-complet.xlsx</code> (<code class="route">admin.exports.workbook</code>)</dd>
+        <dt>Contrôleur</dt><dd><code class="action">ExportController@download</code>, <code class="action">ExportController@bundle</code>, <code class="action">ExportController@workbook</code></dd>
+        <dt>Exports</dt><dd><code class="file">app/Support/ExportDatasets.php</code>, <code class="file">app/Support/CsvExport.php</code>, <code class="file">app/Support/XlsxExport.php</code>, <code class="file">app/Support/PdfExport.php</code></dd>
+        <dt>Vues</dt><dd><code class="file">resources/views/admin/exports/index.blade.php</code>, <code class="file">resources/views/admin/_table-toolbar.blade.php</code>,
+            <code class="file">resources/views/components/export-formats.blade.php</code>, <code class="file">resources/views/pdf/report.blade.php</code></dd>
+    </dl>
+
+    <h3 class="step-title">Ce qui se passe</h3>
+    <p>Sept jeux de données existent : clients, fournisseurs, produits (avec le stock), commandes, lignes de commande, favoris et comptes
+        utilisateurs. La barre d’outils reprend les filtres de l’adresse, sauf le numéro de page :</p>
+    <figure class="code" data-file="resources/views/admin/_table-toolbar.blade.php">
+        <figcaption><span>resources/views/admin/_table-toolbar.blade.php</span><span>Blade</span></figcaption>
+        <pre><code>&lt;x-export-formats route="admin.exports.download" :dataset="$dataset" :query="request()->except('page')"</code></pre>
+    </figure>
+    <figure class="code" data-file="app/Http/Controllers/Admin/ExportController.php">
+        <figcaption><span>app/Http/Controllers/Admin/ExportController.php</span><span>PHP</span></figcaption>
+        <pre><code>return match ($format) {
+    'csv' => CsvExport::download($fileName, $data),
+    'xlsx' => XlsxExport::download($fileName, $label, $data, $filtersText),
+    'pdf' => PdfExport::report($fileName, $label, [$label => $data], $filtersText),
+};</code></pre>
+    </figure>
+    <p>Les filtres utilisent les mêmes portées <code>filter()</code> que les listes : le fichier contient exactement les lignes affichées,
+        et son nom l’indique (<code>commandes-filtre-20261124-101500.csv</code>).</p>
+    <h4>Générer un CSV</h4>
+    <figure class="code" data-file="app/Support/CsvExport.php">
+        <figcaption><span>app/Support/CsvExport.php</span><span>PHP</span></figcaption>
+        <pre><code>public static function write($handle, array $dataset): void
+{
+    $money = $dataset['money'] ?? [];
+
+    fwrite($handle, self::BOM);
+    fputcsv($handle, $dataset['headings'], self::DELIMITER, '"', '');
+
+    foreach ($dataset['rows'] as $row) {
+        foreach ($money as $index) {
+            $row[$index] = self::number($row[$index]);
+        }
+        fputcsv($handle, array_map([self::class, 'safeCell'], $row), self::DELIMITER, '"', '');
+    }
+}</code></pre>
+    </figure>
+    <ul>
+        <li><strong>BOM</strong> (3 octets invisibles au début) : Excel comprend que le fichier est en UTF-8 et affiche bien les accents.</li>
+        <li><strong>Séparateur <code>;</code> et virgule décimale</strong> : réglages d’Excel en français.</li>
+        <li><strong>Injection de formule</strong> : une cellule qui commence par <code>=</code>, <code>+</code>, <code>-</code> ou <code>@</code> pourrait être
+            exécutée comme une formule par le tableur. <code>safeCell()</code> la préfixe d’une apostrophe pour qu’elle reste du texte.</li>
+    </ul>
+    <figure class="code" data-file="app/Support/CsvExport.php">
+        <figcaption><span>app/Support/CsvExport.php</span><span>PHP</span></figcaption>
+        <pre><code>if ($value !== '' &amp;&amp; in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+    return "'".$value;
+}</code></pre>
+    </figure>
+    <h4>Excel et PDF</h4>
+    <p><code class="file">app/Support/XlsxExport.php</code> utilise la bibliothèque PhpSpreadsheet : titre, en-tête bleu encre figé avec flèches de
+        filtre, lignes alternées, montants enregistrés comme de vrais nombres au format « 1 234,50 DH ». Chaque texte est écrit avec
+        <code>setCellValueExplicit(…, DataType::TYPE_STRING)</code>, donc jamais interprété comme une formule. <code class="file">app/Support/PdfExport.php</code>
+        utilise dompdf pour transformer la vue <code class="file">resources/views/pdf/report.blade.php</code> en PDF, avec « Page 1 / 2 » en pied de page.</p>
+    <h4 id="proprietaire-export">Qui peut exporter quoi ?</h4>
+    <p>Les exports de toute la boutique sont derrière le middleware <code>admin</code> : un client reçoit 403. Les clients ont leurs propres
+        téléchargements limités à leurs données (<a href="boutique.html#ch13">chapitre 13</a>). Aucun export ne contient de mot de passe, de
+        hachage, de jeton de connexion ni de <code>checkout_token</code>.</p>
+
+    <h3 class="step-title">Résultat</h3>
+    <figure class="shot"><img src="img/desktop-23-exports.png" alt="Page Exports avec l’encadré Export complet de la boutique et la liste des tables avec les boutons CSV, Excel et PDF" loading="lazy">
+        <figcaption>La page Exports ; le navigateur télécharge le fichier demandé.</figcaption></figure>
+
+    <h3 class="step-title">Ce qui peut mal tourner</h3>
+    <ul>
+        <li>Format non prévu (<code>/admin/exports/commandes.docx</code>) : 404.</li>
+        <li>Client connecté sur une adresse d’export administrateur : 403.</li>
+        <li>Aucun résultat avec les filtres : le fichier contient seulement les titres de colonnes (le PDF affiche « Aucune donnée. »).</li>
+    </ul>
+    <div class="callout try"><strong>À essayer</strong><p>Filtrez les commandes « En attente », cliquez sur « Exporter ces résultats » → CSV,
+        ouvrez le fichier dans Excel : seules les commandes en attente y figurent, avec les accents corrects.</p></div>
+
+    <h3 class="step-title">Notions utilisées</h3>
+    <ul>
+        <li><strong>Génération de CSV</strong> : <code>fputcsv()</code> écrit une ligne en échappant les guillemets ; <code>streamDownload()</code> l’envoie au navigateur.</li>
+        <li><strong>Archive ZIP</strong> : la classe PHP <code>ZipArchive</code> (méthode <code>CsvExport::zip()</code>).</li>
+        <li><strong>Paquets Composer</strong> : <code>phpoffice/phpspreadsheet</code> et <code>barryvdh/laravel-dompdf</code>, déclarés dans <code class="file">composer.json</code>.</li>
+    </ul>
+    </section>
+
+    <nav class="chapter-nav" aria-label="Pages du guide">
+        <a href="boutique.html">← Partie 2 : la boutique</a>
+        <a href="reference.html">Partie 4 : références →</a>
+    </nav>
+    <footer class="doc-footer">Guide écrit à partir du code de ce dossier. Les extraits sont copiés depuis les fichiers indiqués.</footer>
+</main>
+</div>
+</body>
+</html>

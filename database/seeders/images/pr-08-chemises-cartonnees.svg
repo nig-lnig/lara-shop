@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<defs>
+<radialGradient id="bg" cx="32%" cy="18%" r="95%"><stop offset="0" stop-color="#fdfcf9"/><stop offset="0.65" stop-color="#f3efe7"/><stop offset="1" stop-color="#e7e1d5"/></radialGradient>
+<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16"/></filter>
+<filter id="contact" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+<linearGradient id="gloss" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="800" height="600" fill="url(#bg)"/>
+<ellipse cx="418" cy="476" rx="170" ry="26" fill="#1b2433" opacity=".16" filter="url(#soft)"/>
+<ellipse cx="406" cy="470" rx="136" ry="7" fill="#1b2433" opacity=".22" filter="url(#contact)"/>
+<rect x="285.0" y="168" width="230" height="300" rx="3" fill="#2f8a5b" stroke="#27754d" stroke-width="1.5" transform="rotate(-10.5 400 468)"/><rect x="285.0" y="168" width="230" height="300" rx="3" fill="#f2c94c" stroke="#cdaa40" stroke-width="1.5" transform="rotate(-3.5 400 468)"/><rect x="285.0" y="168" width="230" height="300" rx="3" fill="#c9473d" stroke="#aa3c33" stroke-width="1.5" transform="rotate(3.5 400 468)"/><rect x="285.0" y="168" width="230" height="300" rx="3" fill="#2f5fd0" stroke="#2750b0" stroke-width="1.5" transform="rotate(10.5 400 468)"/>
+</svg>

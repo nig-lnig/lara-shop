@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<defs>
+<radialGradient id="bg" cx="32%" cy="18%" r="95%"><stop offset="0" stop-color="#fdfcf9"/><stop offset="0.65" stop-color="#f3efe7"/><stop offset="1" stop-color="#e7e1d5"/></radialGradient>
+<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16"/></filter>
+<filter id="contact" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+<linearGradient id="gloss" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="800" height="600" fill="url(#bg)"/>
+<ellipse cx="418" cy="476" rx="140" ry="26" fill="#1b2433" opacity=".16" filter="url(#soft)"/>
+<ellipse cx="406" cy="470" rx="112" ry="7" fill="#1b2433" opacity=".22" filter="url(#contact)"/>
+<ellipse cx="408" cy="340" rx="92" ry="132" fill="#232731"/>
+<ellipse cx="400" cy="334" rx="90" ry="130" fill="#3b4252"/>
+<path d="M312 318 Q 400 298 488 318" stroke="#232731" stroke-width="4" fill="none"/>
+<line x1="400" y1="206" x2="400" y2="306" stroke="#232731" stroke-width="4"/>
+<rect x="390" y="232" width="20" height="44" rx="10" fill="#9aa1ad"/>
+<ellipse cx="360" cy="268" rx="26" ry="50" fill="#fff" opacity=".18"/>
+</svg>
