@@ -229,7 +229,7 @@ docs/                <span class="c">← le guide HTML</span></pre>
 <!-- =====================================================================
      PARTIE 5 · Routes, méthodes HTTP, validation (≈ 2 min)
      ===================================================================== -->
-<section class="slide lead-slide" data-presenter="5" data-section="Routes et validation" data-time="≈ 2 min">
+<section class="slide lead-slide" data-presenter="5" data-section="Routes et validation" data-time="≈ 3 min">
     <p class="kicker"><span class="num">5</span> Une route réelle</p>
     <h2>« Ajouter au panier » → <code>POST /panier</code></h2>
     <div class="body cols-2">
@@ -256,7 +256,7 @@ docs/                <span class="c">← le guide HTML</span></pre>
     </aside>
 </section>
 
-<section class="slide" data-presenter="5" data-section="Routes et validation" data-time="≈ 2 min">
+<section class="slide" data-presenter="5" data-section="Routes et validation" data-time="≈ 3 min">
     <p class="kicker"><span class="num">5</span> Méthodes HTTP</p>
     <h2>Quatre méthodes pour un même panier</h2>
     <div class="body cols-60">
@@ -279,6 +279,42 @@ docs/                <span class="c">← le guide HTML</span></pre>
     <aside class="notes">
         <p>GET lit, POST crée, PATCH modifie, DELETE supprime. Laravel fait passer PATCH et DELETE par un champ caché grâce à @method.</p>
         <p>Démonstration possible : sur /produits/Pr-000015, demander 3 étiqueteuses, le message apparaît sous le bouton.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="5" data-section="Routes et validation" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">5</span> Validation</p>
+    <h2>Une Form Request vérifie avant le contrôleur</h2>
+    <div class="body cols-2">
+        <div>
+            <p class="code-file">app/Http/Requests/ProductRequest.php</p>
+            <div class="excerpt" data-file="app/Http/Requests/ProductRequest.php"><pre class="code" style="font-size: 14px">public function rules(): array
+{
+    return [
+        'designation' => ['required', 'string', 'max:150'],
+        // …
+        'unit_price' => ['required', 'regex:/^\d{1,8}(\.\d{1,2})?$/', 'numeric', 'gt:0'],
+        // …
+        'stock' => ['required', 'integer', 'min:0', 'max:1000000'],
+    ];
+}</pre></div>
+            <div class="excerpt" data-file="app/Http/Controllers/Admin/ProductController.php" style="margin-top: 12px"><pre class="code" style="font-size: 13.5px">public function store(ProductRequest $request)
+{
+    $data = $request->safe()->except(['image', 'remove_image']);</pre></div>
+        </div>
+        <div>
+            <ol>
+                <li class="small">Laravel crée la <code>ProductRequest</code> <strong>avant</strong> d’entrer dans <code>store()</code>.</li>
+                <li class="small">Une règle échoue → retour au formulaire, valeurs gardées, message sous le champ.</li>
+                <li class="small">Tout est bon → le contrôleur reçoit des données <strong>déjà vérifiées</strong>.</li>
+            </ol>
+            <div class="card red" style="margin-top: 16px"><h3>Exemple</h3><p>Prix « 12,505 » → « Le prix doit être un nombre avec au plus 2 décimales (ex. 12,50). »</p></div>
+            <p class="small muted" style="margin-top: 10px"><code>prepareForValidation()</code> accepte « 12,50 » en le changeant en « 12.50 ».</p>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Une Form Request regroupe les règles d’un formulaire dans une classe. Le contrôleur reste court : il ne voit que des données valides.</p>
+        <p>Les messages sont en français ; certains sont personnalisés dans messages().</p>
         <p class="handoff">Passage : « Certaines routes sont réservées : la partie 6 explique la connexion et les rôles. »</p>
     </aside>
 </section>
@@ -286,7 +322,7 @@ docs/                <span class="c">← le guide HTML</span></pre>
 <!-- =====================================================================
      PARTIE 6 · Authentification et rôles (≈ 2 min)
      ===================================================================== -->
-<section class="slide lead-slide" data-presenter="6" data-section="Connexion et rôles" data-time="≈ 2 min">
+<section class="slide lead-slide" data-presenter="6" data-section="Connexion et rôles" data-time="≈ 3 min">
     <p class="kicker"><span class="num">6</span> Authentification</p>
     <h2>S’inscrire et se connecter</h2>
     <div class="flow">
@@ -317,7 +353,30 @@ docs/                <span class="c">← le guide HTML</span></pre>
     </aside>
 </section>
 
-<section class="slide" data-presenter="6" data-section="Connexion et rôles" data-time="≈ 2 min">
+<section class="slide" data-presenter="6" data-section="Connexion et rôles" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">6</span> Mots de passe forts</p>
+    <h2>Un e-mail valide, un mot de passe solide</h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/register-errors-crop.png" alt="Inscription refusée : e-mail test@localhost invalide, mot de passe trop faible"></figure>
+        <div>
+            <p class="code-file">app/Providers/AppServiceProvider.php</p>
+            <div class="excerpt" data-file="app/Providers/AppServiceProvider.php"><pre class="code" style="font-size: 13px">Password::defaults(function () {
+    $rule = Password::min(config('shop.password_min_length'))->letters()->mixedCase()->numbers()->symbols();</pre></div>
+            <p class="code-file" style="margin-top: 12px">app/Models/User.php</p>
+            <div class="excerpt" data-file="app/Models/User.php"><pre class="code" style="font-size: 13px">$format = 'email:rfc,strict,filter'.(config('shop.email_dns_check') ? ',dns' : '');</pre></div>
+            <ul style="margin-top: 12px">
+                <li class="small"><code>test@localhost</code> : refusé, pas de vrai domaine.</li>
+                <li class="small">Une seule règle pour toute l’application : 10 caractères minimum.</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Démonstration : /inscription avec test@localhost et un mot de passe en minuscules. Les deux champs passent en rouge, avec un message précis.</p>
+        <p>Le mot de passe est défini une seule fois dans AppServiceProvider ; inscription et profil utilisent Password::defaults().</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="6" data-section="Connexion et rôles" data-time="≈ 3 min">
     <p class="kicker"><span class="num">6</span> Restrictions d’accès</p>
     <h2>Middlewares et policy</h2>
     <div class="body cols-2">
@@ -664,7 +723,7 @@ if ($updated === 0) {
 <!-- =====================================================================
      PARTIE 13 · Historique et statuts (≈ 2 min)
      ===================================================================== -->
-<section class="slide lead-slide" data-presenter="13" data-section="Historique et statuts" data-time="≈ 2 min">
+<section class="slide lead-slide" data-presenter="13" data-section="Historique et statuts" data-time="≈ 3 min">
     <p class="kicker"><span class="num">13</span> Mes commandes</p>
     <h2>L’historique du client</h2>
     <div class="body cols-60">
@@ -685,7 +744,7 @@ if ($updated === 0) {
     </aside>
 </section>
 
-<section class="slide" data-presenter="13" data-section="Historique et statuts" data-time="≈ 2 min">
+<section class="slide" data-presenter="13" data-section="Historique et statuts" data-time="≈ 3 min">
     <p class="kicker"><span class="num">13</span> Statuts de livraison</p>
     <h2>Un parcours, des étapes autorisées</h2>
     <div class="flow">
@@ -710,6 +769,42 @@ if ($updated === 0) {
     </div>
     <aside class="notes">
         <p>Les statuts possibles après chaque étape sont écrits dans un tableau du modèle Order. C’est une petite machine à états.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="13" data-section="Historique et statuts" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">13</span> Annulation</p>
+    <h2>Le client annule, le stock revient une seule fois</h2>
+    <div class="body cols-2">
+        <div>
+            <p class="code-file">app/Services/OrderService.php</p>
+            <div class="excerpt" data-file="app/Services/OrderService.php"><pre class="code" style="font-size: 13.5px">if ($newStatus === 'cancelled') {
+    $firstTime = Order::whereKey($order->id)
+        ->whereNull('stock_restored_at')
+        ->update(['stock_restored_at' => now()]);
+
+    if ($firstTime === 1) {
+        foreach ($order->lines as $line) {
+            Product::whereKey($line->product_id)->increment('stock', $line->quantity);
+        }
+    }
+}</pre></div>
+        </div>
+        <div>
+            <p class="code-file">app/Policies/OrderPolicy.php</p>
+            <div class="excerpt" data-file="app/Policies/OrderPolicy.php"><pre class="code" style="font-size: 13.5px">return $user->client_id !== null
+    &amp;&amp; $user->client_id === $order->client_id
+    &amp;&amp; $order->canBeCancelledByCustomer();</pre></div>
+            <ul style="margin-top: 14px">
+                <li class="small">Bouton « Annuler » seulement sur <strong>sa</strong> commande <strong>en attente</strong>.</li>
+                <li class="small">Message : « La commande … a été annulée. Les articles ont été remis en stock. »</li>
+                <li class="small">Deux clics : <code>update()</code> renvoie 1 puis 0, le stock n’est rendu qu’une fois.</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>La policy décide qui peut annuler ; le service remet le stock dans une transaction.</p>
+        <p>Ne pas annuler Com-000003 en direct : la partie 16 s’en sert pour sa démonstration. Montrer seulement le bouton.</p>
         <p class="handoff">Passage : « Qui fait avancer ces statuts ? L’administrateur : la partie 14 ouvre l’administration. »</p>
     </aside>
 </section>
@@ -717,7 +812,7 @@ if ($updated === 0) {
 <!-- =====================================================================
      PARTIE 14 · Tableau de bord et clients (≈ 2 min)
      ===================================================================== -->
-<section class="slide lead-slide" data-presenter="14" data-section="Tableau de bord et clients" data-time="≈ 2 min">
+<section class="slide lead-slide" data-presenter="14" data-section="Tableau de bord et clients" data-time="≈ 3 min">
     <p class="kicker"><span class="num">14</span> Administration</p>
     <h2>Le tableau de bord : <code>/admin</code></h2>
     <div class="body cols-60">
@@ -738,7 +833,7 @@ if ($updated === 0) {
     </aside>
 </section>
 
-<section class="slide" data-presenter="14" data-section="Tableau de bord et clients" data-time="≈ 2 min">
+<section class="slide" data-presenter="14" data-section="Tableau de bord et clients" data-time="≈ 3 min">
     <p class="kicker"><span class="num">14</span> Clients</p>
     <h2>Gérer les clients, sans perdre l’historique</h2>
     <div class="body cols-2">
@@ -761,6 +856,47 @@ if ($updated === 0) {
     <aside class="notes">
         <p>Le CRUD des clients : créer, lire, modifier, supprimer. La suppression devient un archivage quand le client a un historique.</p>
         <p>Si la démo échoue : montrer l’extrait de code et le message attendu.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="14" data-section="Tableau de bord et clients" data-time="≈ 3 min">
+    <p class="kicker"><span class="num">14</span> Archivage</p>
+    <h2>Un trait partagé par trois modèles</h2>
+    <div class="body cols-2">
+        <div>
+            <p class="code-file">app/Models/Concerns/Archivable.php</p>
+            <div class="excerpt" data-file="app/Models/Concerns/Archivable.php"><pre class="code" style="font-size: 14px">trait Archivable
+{
+    public function archive(): void
+    {
+        $this->forceFill(['archived_at' => now()])->save();
+    }
+    // …
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->whereNull('archived_at');
+    }</pre></div>
+            <div class="excerpt" data-file="app/Models/Client.php" style="margin-top: 12px"><pre class="code" style="font-size: 14px">use Archivable, HasBusinessCode, HasFactory;</pre></div>
+        </div>
+        <div>
+            <table class="t">
+                <thead><tr><th>Modèle</th><th>Archivé au lieu d’être supprimé si…</th></tr></thead>
+                <tbody>
+                <tr><td>Client</td><td>il a des commandes ou un compte</td></tr>
+                <tr><td>Produit</td><td>il apparaît dans une ligne de commande</td></tr>
+                <tr><td>Fournisseur</td><td>il a des produits</td></tr>
+                </tbody>
+            </table>
+            <ul style="margin-top: 16px">
+                <li class="small">Écrit une fois, utilisé dans <code>Client</code>, <code>Product</code>, <code>Supplier</code>.</li>
+                <li class="small"><code>Client::active()</code> : seulement les fiches non archivées.</li>
+                <li class="small">« Restaurer » remet <code>archived_at</code> à vide.</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Un trait est un morceau de code qu’on colle dans plusieurs classes. Ici, archiver = remplir la date archived_at.</p>
+        <p>Les anciennes commandes pointent toujours vers un client ou un produit qui existe : l’historique reste complet.</p>
         <p class="handoff">Passage : « Même logique pour le catalogue : la partie 15 présente fournisseurs, produits et stock. »</p>
     </aside>
 </section>
@@ -879,7 +1015,7 @@ if ($updated === 0) {
 <!-- =====================================================================
      PARTIE 17 · Téléchargements et exports (≈ 2 min 30)
      ===================================================================== -->
-<section class="slide lead-slide" data-presenter="17" data-section="Téléchargements et exports" data-time="≈ 2 min 30">
+<section class="slide lead-slide" data-presenter="17" data-section="Téléchargements et exports" data-time="≈ 3 min 30">
     <p class="kicker"><span class="num">17</span> Qui télécharge quoi ?</p>
     <h2>Chaque rôle voit seulement ce qui lui revient</h2>
     <table class="t">
@@ -897,7 +1033,7 @@ if ($updated === 0) {
     </aside>
 </section>
 
-<section class="slide" data-presenter="17" data-section="Téléchargements et exports" data-time="≈ 2 min 30">
+<section class="slide" data-presenter="17" data-section="Téléchargements et exports" data-time="≈ 3 min 30">
     <p class="kicker"><span class="num">17</span> Exports administrateur</p>
     <h2>Des CSV qui s’ouvrent bien dans Excel</h2>
     <div class="body cols-60">
@@ -917,6 +1053,31 @@ if ($updated === 0) {
     </div>
     <aside class="notes">
         <p>Démonstration : filtrer les commandes « En attente », cliquer sur Exporter ces résultats en CSV, ouvrir le fichier dans Excel.</p>
+    </aside>
+</section>
+
+<section class="slide" data-presenter="17" data-section="Téléchargements et exports" data-time="≈ 3 min 30">
+    <p class="kicker"><span class="num">17</span> Excel et PDF</p>
+    <h2>Les mêmes données, trois formats</h2>
+    <div class="body cols-60">
+        <figure class="shot"><img src="img/my-data-crop.png" alt="Page Mes données : rapport PDF, classeur Excel, archive CSV et fichiers séparés"></figure>
+        <div>
+            <p class="code-file">app/Http/Controllers/Admin/ExportController.php</p>
+            <div class="excerpt" data-file="app/Http/Controllers/Admin/ExportController.php"><pre class="code" style="font-size: 12.5px">return match ($format) {
+    'csv' => CsvExport::download($fileName, $data),
+    'xlsx' => XlsxExport::download($fileName, $label, $data, $filtersText),
+    'pdf' => PdfExport::report($fileName, $label, [$label => $data], $filtersText),
+};</pre></div>
+            <ul style="margin-top: 12px">
+                <li class="small"><strong>Excel</strong> (PhpSpreadsheet) : en-tête bleu encre, lignes zébrées, titres figés, flèches de filtre.</li>
+                <li class="small"><strong>PDF</strong> (dompdf) : une vue Blade, A4 paysage.</li>
+                <li class="small">Le client a les mêmes boutons dans <code>/mes-donnees</code>, avec <strong>ses</strong> données seulement.</li>
+            </ul>
+        </div>
+    </div>
+    <aside class="notes">
+        <p>Les données sont préparées une seule fois (ExportDatasets) ; seul le format de sortie change.</p>
+        <p>Démonstration : Mes données → Classeur Excel, puis Rapport PDF. Montrer les filtres d’Excel.</p>
         <p class="handoff">Passage : « Place à la démonstration complète : la partie 18 enchaîne tout, du panier jusqu’à l’administration. »</p>
     </aside>
 </section>
